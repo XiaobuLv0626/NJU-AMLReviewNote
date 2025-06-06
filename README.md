@@ -7,7 +7,7 @@ Nanjing University Advanced Machine Learning Review Note
 这里是南京大学《高级机器学习》课程复习笔记的仓库。
 
 ## 下载
-如果不需要编辑笔记的内容，而只想直接使用笔记，请直接下载根目录下的PDF(最后更新时间：2025/6/6)。
+如果不需要编辑笔记的内容，而只想直接使用笔记，请直接下载Release发布的正式版PDF。
 
 如果想要编辑笔记，请Fork后进入tex文件夹中，索引每一章的内容进行修改。
 
