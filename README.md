@@ -7,7 +7,7 @@ Nanjing University Advanced Machine Learning Review Note
 这里是南京大学《高级机器学习》课程复习笔记的仓库。
 
 ## 下载
-如果不需要编辑笔记的内容，而只想直接使用笔记，请直接下载本界面中的PDF(最后更新时间：2025/6/6)。
+如果不需要编辑笔记的内容，而只想直接使用笔记，请直接下载根目录下的PDF(最后更新时间：2025/6/6)。
 
 如果想要编辑笔记，请Fork后进入tex文件夹中，索引每一章的内容进行修改。
 
@@ -20,14 +20,13 @@ Nanjing University Advanced Machine Learning Review Note
 
 ## Contributors：
 
-[清野千秋] 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/XiaobuLv0626"><img src="https://avatars.githubusercontent.com/u/82595648?v=4?s=100" width="100px;" alt="Sueno_Chiaki"/><br /><sub><b>Sueno_Chiaki</b></sub></a><br /><a href="https://github.com/Sueno_Chiaki/NJU-AMLReviewNote/commits?author=XiaobuLv0626" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/XiaobuLv0626"><img src="https://avatars.githubusercontent.com/u/82595648?v=4?s=100" width="100px;" alt="Sueno_Chiaki"/><br /><sub><b>Sueno_Chiaki</b></sub></a><br /><a href="https://github.com/Sueno_Chiaki/NJU-AMLReviewNote/commits?author=XiaobuLv0626" title="Documentation">📖</a> <a href="https://github.com/Sueno_Chiaki/NJU-AMLReviewNote/commits?author=XiaobuLv0626" title="Code">💻</a></td>
     </tr>
   </tbody>
   <tfoot>
