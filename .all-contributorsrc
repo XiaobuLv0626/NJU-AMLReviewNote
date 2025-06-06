@@ -1,0 +1,25 @@
+{
+  "projectName": "NJU-AMLReviewNote",
+  "projectOwner": "Sueno_Chiaki",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": true,
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "XiaobuLv0626",
+      "name": "Sueno_Chiaki",
+      "avatar_url": "https://avatars.githubusercontent.com/u/82595648?v=4",
+      "profile": "https://github.com/XiaobuLv0626",
+      "contributions": [
+        "doc"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "linkToUsage": true
+}

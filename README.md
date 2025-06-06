@@ -1,4 +1,7 @@
 # NJU-AMLReviewNote
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 Nanjing University Advanced Machine Learning Review Note
 # 南京大学《高级机器学习》复习笔记
 这里是南京大学《高级机器学习》课程复习笔记的仓库。
@@ -17,7 +20,31 @@ Nanjing University Advanced Machine Learning Review Note
 
 ## Contributors：
 
-清野千秋 
+[清野千秋] 
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/XiaobuLv0626"><img src="https://avatars.githubusercontent.com/u/82595648?v=4?s=100" width="100px;" alt="Sueno_Chiaki"/><br /><sub><b>Sueno_Chiaki</b></sub></a><br /><a href="https://github.com/Sueno_Chiaki/NJU-AMLReviewNote/commits?author=XiaobuLv0626" title="Documentation">📖</a></td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td align="center" size="13px" colspan="7">
+        <img src="https://raw.githubusercontent.com/all-contributors/all-contributors-cli/1b8533af435da9854653492b1327a23a4dbd0a10/assets/logo-small.svg">
+          <a href="https://all-contributors.js.org/docs/en/bot/usage">Add your contributions</a>
+        </img>
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
 
 ## 许可
 
