@@ -1,0 +1,118 @@
+\chapter{神经网络}
+\section{神经网络的发展史}\label{sec:5.1}
+\begin{itemize}
+    \item 1943——1963，以感知机为代表。
+    \item 1969年，单层神经网络不能解决非线性问题，进入低谷期。
+    \item 1982——2000，以Hopfield网络与反向传播算法为代表。
+    \item 2006——至今，预训练+微调使深度网络最优化更简单。
+\end{itemize}
+\section{神经元模型}\label{sec:5.2}
+神经元模型的基本思想：“电位”超过“阈值”被“激活”，向其他神经元发送信号。
+
+经典模型：\textbf{M-P神经元模型}
+\begin{figure}[!htbp]
+	\centering
+		\sidecaption{MP神经元模型。基于输入信号与带权重连接与神经元阈值的比较，通过激活函数得到输出\label{fig:5.1}}{\includegraphics[width=.8\textwidth]{images/MPNeuron.png}}
+\end{figure}
+
+理想的神经元模型激活函数是阶跃函数，但不连续不可导不光滑影响实际使用，因此一般使用\textbf{sigmoid函数}进行代替，后者平滑且无穷阶可导。
+
+\begin{figure}[!htbp]
+	\centering
+		\sidecaption{典型的神经元激活函数\label{fig:5.2}}{\includegraphics[width=.8\textwidth]{images/sigmoid.png}}
+\end{figure}
+
+\section{感知机与多层网络}\label{sec:5.3}
+
+感知机由两层神经元组成，输入曾接受外界输入信号传递给输出层，输出层是M-P神经元，也称为“阈值逻辑单元”。
+
+\marginpar{\footnotesize 非线性可分意味着不能通过线性超平面划分模式，这就是第一次低谷出现的原因，可以想想上一节的SVM。}
+
+感知机可以容易的实现逻辑与或非运算这种\textbf{线性可分问题}，但局限于仅有输出层一层逻辑处理单元，学习能力有限，无法处理非线性可分问题。
+
+为解决这一问题，我们构建\textbf{多层感知机}，在输出层与输出层之间加入一层具有激活函数的功能神经元，称之为隐层或隐藏层。
+
+更一般的神经网络被称之为“\textbf{多层前馈神经网络}”，其中相邻两层的神经元全互联，不存在同层以及跨层连接；输入层神经元接收外界输入，隐含层与输出层神经元对信号进行加工输出，学习过程为根据训练数据调整神经元的“连接权”以及功能神经元的“阈值”。
+
+\section{误差逆传播算法}\label{sec:5.4}
+误差逆传播算法也被称之为\textbf{后向传播（BackPropagation， BP）}算法，是最成功以及最广泛使用的神经网络学习算法。
+
+给定一个训练集$D = \{(\boldsymbol x_1, \boldsymbol y_1), ..., (\boldsymbol x_m, \boldsymbol y_m)\}, \boldsymbol x_i\in \mathbb{R}^d, \boldsymbol y_i\in \mathbb{R}^l$，即输入示例由$d$个属性描述，输出$l$维实值向量。
+
+\marginpar{\footnotesize 推导的提示：Sigmoid函数有个很好的性质，$f'(x)=f(x)(1-f(x))$。}
+
+我们给出一个$d$个输入神经元，$q$个隐层神经元与$l$个输出神经元的多层前向前馈网络结构，模拟对该训练集的实际学习，如下图，并假设其中所有功能神经元使用sigmoid函数作为激活函数。
+
+\begin{figure}[!htbp]
+	\centering
+		\sidecaption{BP网络的示意图\label{fig:5.3}}{\includegraphics[width=.8\textwidth]{images/BP.png}}
+\end{figure}
+
+\thm{后向传播推导}{thm_ref}{首先声明记号：$\theta_j$代表输出层的第j个神经元阈值，$\gamma_h$代表隐层第h个神经元阈值，$v_{ih}$代表输入层与隐层神经元之间的连接权重，$w_{hj}$代表隐层与输出层神经元之间的连接权重。
+
+因此，网络中需要优化的参数为：$(d+l)q(所有的连接权重) + (l+q)(功能神经元的阈值)$
+
+对于样例$(\boldsymbol x_k, \boldsymbol y_k)$，假设网络的实际输出为$\hat{\boldsymbol y}_k$，则：
+
+隐层第h个神经元接收到的输入为$\alpha_h = \sum_{i=1}^d v_{ih}x_i$，得到的输出为$b_h= f(\alpha_h-\gamma_h)$；
+
+输出层第j个神经元接收到的输入为$\beta_j = \sum_{i=q}^dw_{hj}b_h$，输出为$\hat{y}_j^k = f(\beta_j-\theta_j)$。
+
+网络在$(\boldsymbol x_k, \boldsymbol y_k)$上的均方误差即为\[E_k = \frac{1}{2}\sum_{j=1}^l (\hat{y}_j^k-y_j^k)^2.\]
+
+BP算法基于梯度下降策略，以误差率为目标，计算负梯度方向对参数进行调整。给定学习率$\eta$，可以计算参数更新式，以$v_{ih}$为例：
+\[
+\begin{aligned}
+\Delta v_{i h} & =-\eta \frac{\partial E_{k}}{\partial v_{i h}} \\
+& = -\eta \frac{\partial E_{k}}{\partial b_h} \cdot \frac{\partial b_h}{\partial \alpha_{h}}  \cdot \frac{\partial \alpha_{h}}{\partial v_{i h}} \\ 
+& = -\eta \frac{\partial E_{k}}{\partial b_h} \cdot \frac{\partial b_h}{\partial \alpha_{h}} \cdot x_i\\
+g_j &= -\frac{\partial E_{k}}{\partial \hat{y}_j^k} \cdot \frac{\partial \hat{y}_j^k}{\partial \beta_{j}}\\
+& = -(\hat{y}_j^k- y_j^k)f'(\beta_j-\theta_j)\\
+&= \hat{y}_j^k(1-\hat{y}_j^k)(y_j^k-\hat{y}_j^k)\\
+e_h & = -\frac{\partial E_{k}}{\partial b_h} \cdot \frac{\partial b_h}{\partial \alpha_{h}} \\ 
+& = -\sum_{j=1}^l\frac{\partial E_{k}}{\partial \beta_j}\cdot \frac{\partial \beta_j}{\partial b_{h}}f'(\alpha_h-\gamma_h) \\
+& = \sum_{j=1}^{l}w_{hj}g_jf'(\alpha_h-\gamma_h) \\
+& = b_n(1-b_n)\sum_{j=1}^{l}w_{hj}g_j  \\
+\Delta v_{ih} & = \eta e_hx_i
+\end{aligned}
+\]
+同理，可以计算图中每个参数的变化量，并反向传播更新这些参数。
+}
+
+在实际应用中，存在标准BP算法以及累计BP算法。标准BP算法每次对单个训练样例更新权值与阈值；而累计BP算法读取整个训练集之后再更新参数，优化整个训练集上的累计误差。
+
+多层前馈网络具有\textbf{强大的学习能力}：包含足够多神经元的隐层, 多层前馈神经网络能以任意精度逼近任意复杂度的连续函数。
+
+\marginpar{\footnotesize 缓解过拟合的方法：Early Stop，正则化。}
+但多层前馈网络由于其强大学习能力，非常容易过拟合，且难以估计隐层神经元个数。
+
+\section{全局最小与局部最小}\label{sec:5.5}
+
+学习过程本质上是一个参数寻优过程，在参数空间中，可能存在多个局部最小，但只有一个全局最小，如何找到这个全局最小是一个问题。
+
+“跳出”局部极小一般使用的算法：设置不同的初始参数，模拟退火，随机扰动，遗传算法etc...
+
+\section{深度学习}\label{sec:5.6}
+深度学习是具有很多个隐层的神经网络，计算能力的提升与训练数据的大幅增加使得复杂模型的训练成为可能。
+
+增加模型复杂度的方式：
+\begin{itemize}
+    \item 模型宽度：增加隐层神经元的数目；
+    \item 模型深度：增加隐层的数目（更有效）。
+\end{itemize}
+
+在多个隐层内，复杂模型的反向传播可能发生梯度消失问题，需要别的训练方法。
+\begin{itemize}
+    \item 预训练+微调：每次训练时将上一层隐层结点的输出作为输入, 本层隐结点的输出作为输出，仅训练一层网络。预训练全部完成后，对整个网络进行微调训练，可以看作对参数分组找到局部最优后再全局调优。
+    \item 权共享：每组神经元使用相同的连接权值，e.g. CNN可以用BP进行训练，但在训练中，无论是卷积层还是采样层，每一组神经元都是用相同的连接权，从而大幅减少了需要训练的参数数目。
+\end{itemize}
+
+\section{本章往年考试题目}\label{sec:5.7}
+
+\ex{2022/2023年考试原题}{ex_ref}{多层前馈网络的计算能力、局限以及解决方法？}
+见\ref{sec:5.4}节.
+解决方法：
+
+早停（Early Stop）：在训练过程中，若训练误差降低，但是验证误差升高，则停止训练。
+
+正则化：在误差目标函数中增加一项描述网络复杂程度的成分，防止模型过于复杂，例如连接权值和阈值的平方和。

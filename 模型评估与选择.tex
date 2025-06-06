@@ -1,0 +1,132 @@
+\chapter{模型评估与选择}
+
+\section{经验误差与过拟合}\label{sec:2.1}
+
+\begin{itemize}
+    \item 泛化误差：在“未来样本”（unseen instance）上的误差。
+    \item 经验误差：在训练集合上的误差，也被称之为“训练误差”。
+    \item 过拟合：把特性当成共性，特征学习过度。
+    \item 欠拟合：把共性当成特性，特征学习不足。
+\end{itemize}
+
+\begin{figure}[!htbp]
+	\centering
+		\sidecaption{一个实际过拟合/欠拟合的例子\label{fig:example1}}{\includegraphics[width=.7\textwidth]{images/over-and-under.png}}
+\end{figure}
+%--------------------------------%
+%--------------------------------%
+\section{评估方法}\label{sec:2.2}
+\begin{itemize}
+    \item 留出法：将数据集划分为两个互斥的集合——训练与测试集，并尽可能保持数据分布以及类别比例的一致性；
+    \item 交叉验证法：将数据集分层采样划分为K个大小相似的互斥子集，每次用k-1个子集的并集作为训练集，余下的子集作为测试集，最终返回测试结果的均值。
+    \item 留一法：k=数据集的样本数。
+\end{itemize}
+
+上述方法从上到下变得越精确，但复杂度也更高，计算开销更大。
+
+%--------------------------------%
+%--------------------------------%
+\section{性能度量}\label{sec:2.3}
+性能度量是衡量模型泛化能力的评价标准，反映了任务需求；使用不同的性能度量往往会导致不同的评判结果。
+
+\prp{性能度量}{pro_ref}{对于\textbf{回归任务}，最常用的是均方误差MSE：
+\[
+E(f ; D)=\frac{1}{m} \sum_{i=1}^{m}\left(f\left(\boldsymbol{x}_{i}\right)-y_{i}\right)^{2}
+\]
+
+对于\textbf{分类任务}，错误率与精度是最常用的性能度量：
+\begin{enumerate}
+    \item 分类错误率：$ E(f ; D)=\frac{1}{m} \sum_{i=1}^{m} \mathbb{I}\left(f\left(\boldsymbol{x}_{i}\right) \neq y_{i}\right) $
+    \item 精度Accuracy：$\operatorname{acc}(f ; D) =\frac{1}{m} \sum_{i=1}^{m} \mathbb{I}\left(f\left(\boldsymbol{x}_{i}\right)=y_{i}\right) = 1-E(f ; D) . $
+\end{enumerate}
+
+除此之外，基于分类结果混淆矩阵，还有： 
+\begin{itemize}
+    \item 查准率：$ P = \frac{TP}{TP+FP} $
+    \item 查全率：$ R = \frac{TP}{TP+FN} $
+    \item F1度量（F1-Score）：$ F_1 = \frac{2\times P\times R}{P+R} = \frac{2\times TP}{样例总数+TP-TN} $
+    \item F-\beta 度量：$ F_\beta = \frac{(1+\beta^2)\times P\times R}{(\beta^2\times P)+R} $
+\end{itemize}
+
+以及AUC（Area Under Curve），基于真比例率(y)与假正例率(x)形成的ROC曲线，曲线下面积大小即为AUC：
+\[
+AUC = \frac{1}{2}\sum_{i=1}^{m-1}(x_{i+1}-x_i)\cdot (y_i+ y_{i+1})
+\]
+}
+
+\begin{figure}[!htbp]
+	\centering
+		\sidecaption{分类结果混淆矩阵，上述公式中对应的值参见此处。\label{fig:example1}}{\includegraphics[width=.6\textwidth]{images/types.png}}
+\end{figure}
+
+%--------------------------------%
+%--------------------------------%
+\section{比较检验}\label{sec:2.4}
+测试性能不等于泛化性能，且会随着测试集的变化而变化，机器学习算法本身有一定的随机性。因此，需要利用\textbf{假设检验}为学习器的性能比较提供数学理论依据。
+
+\thm{二项检验}{thm_ref}{考虑假设“$\epsilon \le \epsilon_0$”, 则在$1 - \alpha$的概率内所能观测到的最大错误率如下式计算：
+\[
+\bar{\epsilon} = \min \epsilon \ \text{s.t.} \ \sum_{i=\epsilon\times m+1}^m\binom{m}{i}\epsilon_0^i(1-\epsilon_0)^{m-i} \lt \alpha
+\]
+
+此时，若测试错误率$\hat{\epsilon}$小于临界值$\bar{\epsilon}$，则我们称，在\alpha 的显著度下，假设不能被拒绝，泛化器的错误率不大于$\epsilon_0$。否则，该假设可被拒绝，即在\alpha 的显著度下可认为学习器的泛化错误率大于$\epsilon_0$.
+}
+
+\thm{T-检验}{thm_ref}{很多时候，我们并非只做一次留出法统计，而是通过多次留出法或是使用交叉验证法进行多次训练测试，得到k个测试错误率$\hat{\epsilon}_{1}, \hat{\epsilon}_{2}, \ldots, \hat{\epsilon}_{k}$，则平均错误率$\mu$与方差$\sigma^2$为：
+\[
+\begin{array}{c}\mu=\frac{1}{k} \sum_{i=1}^{k} \hat{\epsilon}_{i} \\ \sigma^{2}=\frac{1}{k-1} \sum_{i=1}^{k}\left(\hat{\epsilon}_{i}-\mu\right)^{2}\end{array}
+\]
+这k个测试错误率可看作泛化错误率$\epsilon_0$的独立采样，则变量
+\[
+\tau_{t}=\frac{\sqrt{k}\left(\mu-\epsilon_{0}\right)}{\sigma}
+\]
+服从自由度为$k - 1$的t分布。
+因此，假设$\epsilon = \epsilon_0$对于显著度\alpha, 若$ [t_{-\alpha/2}, t_{\alpha/2}] $ 位于临界范围$ | \mu - \epsilon_0 | $内，则假设不能被拒绝，即可认为泛化错误率$\epsilon = \epsilon_0$，其置信度为$1 - \alpha$。
+}
+
+对两个学习器A和B，若我们使用k折交叉验证法得到的测试错误率分
+别为 $ \epsilon_{1}^{A}, \ldots, \epsilon_{k}^{A} $ 和 $ \epsilon_{1}^{B}, \ldots, \epsilon_{k}^{B} $，其中$ \epsilon_i^A$和$\epsilon_i^B$是在相同的第i折训练/测试集上得到的结果，则可用k折交叉验证"成对t检验"来进行比较检验。其基本思想是：若两个学习器的性能相同，则\textbf{它们使用相同的训练/测试集得到的测试错误率}应相同，即$\epsilon_i^A=\epsilon_i^B$。
+
+
+%--------------------------------%
+%--------------------------------%
+\section{偏差与方差}\label{sec:2.5}
+对于回归任务，泛化误差可通过“偏差——方差分解”拆解为：
+\begin{figure}[!htbp]
+	\centering
+	{\includegraphics[width=\textwidth]{images/bias-var.png}}
+\end{figure}
+
+\begin{Keynote}
+泛化性能是由\textbf{学习算法的能力}，\textbf{数据的充分性}以及\textbf{学习任务本身的难度}共同决定。
+\end{Keynote}
+
+\section{本章往年考试题目}\label{sec:2.6}
+\ex{2023年考试原题}{ex_ref}{从训练误差和泛化误差的角度阐述过拟合和欠拟合的含义，并举出1-2个机器学习模型例子说明如何克服过拟合和欠拟合。}
+\begin{itemize}
+    \item 过拟合：训练误差小，泛化误差大
+    \item 欠拟合：训练误差和泛化误差都大
+\end{itemize}
+
+克服过拟合的方法：
+\begin{itemize}
+    \item 模型简单化
+    \item 增加训练数据
+    \item 增加正则化约束
+    \item 提前结束训练
+\end{itemize}
+
+克服欠拟合的方法：
+\begin{itemize}
+    \item 模型复杂化
+    \item 加入新的特征
+    \item 降低正则化约束
+\end{itemize}
+
+\ex{2022年考试原题}{ex_ref}{理想模型为什么难以实现？评估方法，性能度量，比较检验分别解决什么问题？}
+理想模型难以实现的原因：数据的可获得性和质量问题；模型的复杂性和计算资源的问题；泛化能力的局限性；人工智能的局限性；建模复杂性和不确定性。
+\begin{itemize}
+    \item 评估方法：解决的是“如何获取测试结果”；
+    \item 性能度量：解决的是“如何评估性能优劣”；
+    \item 比较检验：解决的是“如何判断实质差别”。
+\end{itemize}

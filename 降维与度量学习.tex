@@ -1,0 +1,122 @@
+\chapter{降维与度量学习}
+
+\section{k-近邻学习}\label{sec:10.1}
+kNN是一种常用的监督学习方式，其主要思想是基于某种距离度量找到训练集中与其最接近的k个训练样本，基于这k个邻居的信息进行预测。
+
+该方法是\textbf{“懒惰学习”}的典型代表：没有显式的训练过程，仅仅把训练样本收集起来，待收到测试样本之后再进行处理。
+
+“最近邻分类器”的基本性质是：给定测试样本$\boldsymbol x$与最近邻样本$\boldsymbol z$，最近邻分类器出错的概率是$\boldsymbol x,\boldsymbol z$类别标记不同的概率：$P(err) = 1-\sum_{c\in \mathcal{Y}}P(c\mid \boldsymbol x)P(c\mid \boldsymbol z)$。
+假设样本独立同分布且对任意测试样本总能在任意近的范围内找到训练样本$\boldsymbol z$，则贝叶斯最优分类器结果$c* = \arg\max_{c\in \mathcal{Y}}P(c\mid \boldsymbol x)$的出错概率为：
+\[
+\begin{aligned} P(e r r) & =1-\sum_{c \in \mathcal{Y}} P(c \mid \boldsymbol{x}) P(c \mid \boldsymbol{z}) \\ & \simeq 1-\sum_{c \in \mathcal{Y}} P^{2}(c \mid \boldsymbol{x}) \\ & \leqslant 1-P^{2}\left(c^{*} \mid \boldsymbol{x}\right) \\ & =\left(1+P\left(c^{*} \mid \boldsymbol{x}\right)\right)\left(1-P\left(c^{*} \mid \boldsymbol{x}\right)\right) \\ & \leqslant 2 \times\left(1-P\left(c^{*} \mid \boldsymbol{x}\right)\right)\end{aligned}
+\]
+
+即最近邻分类器的泛化错误率不会超过贝叶斯最优分类器的两倍。
+
+\section{低维嵌入}\label{sec:10.2}
+
+上述讨论基于密采样假设：样本的每个$\epsilon$-邻域都有近邻；但是这个假设在实际情况中可能发生\textbf{维度灾难}。
+\marginnote{\footnotesize 维度增加带来的样本数增加是指数级的。}
+并且，高维空间计算距离度量难度大，近邻容易不准。
+
+为解决这个方法，我们选择进行降维，找到与学习任务密切相关的某个高维空间的\textbf{低维“嵌入”}。
+
+在低维空间中保持原始空间中样本之间的距离的方法是\textbf{多维缩放}。其主要思路为\textbf{“内积保距”}，即寻找一个低维子空间，使得距离与样本原有距离近似不变。
+
+多维缩放方法的技巧为特征值分解，即分解内积矩阵的特征值，取一部分最大特征值作为低维空间。由谱分布长尾可知，存在相当数量的小特征值，删除对距离影响不大。
+
+\section{流形学习}\label{sec:10.3}
+流形学习是一类借鉴了拓扑流形概念的降维方法，拓扑流形在局部具有欧氏空间的性质，能用欧氏距离进行距离计算，这使得将低维流形嵌入高维空间中，就可以在局部建立降维映射关系。
+
+\subsection{等度量映射ISOMAP}
+ISOMAP的关键思路为计算“测地线距离”。对每个点基于欧式距离找出其近邻点，基于最短路径算法近似任意两点之间的测地线距离，在得到任意两点的距离之后通过MDS（多维缩放）获得低维嵌入。
+
+\subsection{局部线性嵌入LLE}
+LLE的关键思路为重构权值，试图保持邻域内样本之间的线性关系。LLE为每个样本构造近邻下标集合$Q_i$，再计算出基于$Q_i$的线性重构系数$\boldsymbol w_i$：
+\[
+\min _{w_{1}, \ldots, w_{m}} \sum_{i=1}^{m}\left\|x_{i}-\sum_{j \in Q_{i}} w_{i j} x_{j}\right\|_{2}^{2} \quad \text{s.t.}
+\quad \sum_{j \in Q_{i}} w_{i j}=1，
+\]LLE若要在低维空间中保持$w_{i j}$不变，则可求解下式：\[
+\min _{z_{1}, \ldots, z_{m}} \sum_{i=1}^{m}\left\|z_{i}-\sum_{j \in Q_{i}} w_{i j} z_{j}\right\|_{2}^{2}
+\]
+
+\section{度量学习}\label{sec:10.4}
+机器学习降维数据的主要目的是寻找合适的低维空间，而每个空间对应了在样本属性上定义的一个距离度量，而\textbf{度量学习}的动机即为直接“学习”一个合适的距离度量。
+
+\thm{马氏距离}{thm_ref}{
+
+对于两个$d$维样本$\boldsymbol x_i, \boldsymbol x_j$，他们之间的平方欧氏距离可写为：\[
+\operatorname{dist}_{\mathrm{ed}}^{2}\left(\boldsymbol{x}_{i}, \boldsymbol{x}_{j}\right)=\left\|\boldsymbol{x}_{i}-\boldsymbol{x}_{j}\right\|_{2}^{2}=\operatorname{dist}_{i j, 1}^{2}+\operatorname{dist}_{i j, 2}^{2}+\ldots+\operatorname{dist}_{i j, d}^{2}\ ,
+\]
+其中$\operatorname{dist}_{i j, d}$代表$\boldsymbol x_i, \boldsymbol x_j$在第$k$维上的距离，对每个属性引入一个属性权重$\boldsymbol w$代表属性的重要度，可得:\[
+\begin{aligned}
+\operatorname{dist}_{\mathrm{ed}}^{2}\left(\boldsymbol{x}_{i}, \boldsymbol{x}_{j}\right) & =\left\|\boldsymbol{x}_{i}-\boldsymbol{x}_{j}\right\|_{2}^{2}=w_1\cdot\operatorname{dist}_{i j, 1}^{2}+w_2\cdot\operatorname{dist}_{i j, 2}^{2}+\ldots+w_d\cdot\operatorname{dist}_{i j, d}^{2} \\
+& = (\boldsymbol{x}_{i}-\boldsymbol{x}_{j})^\mathrm{T}\mathbf{W}(\boldsymbol{x}_{i}-\boldsymbol{x}_{j})
+\end{aligned}
+\]
+
+其中$\mathbf{W}$是一个对角矩阵，对角上每个元素均为权值$w_i$，但对角矩阵代表属性之间彼此无关，而属性有时正相关，因此将$\mathbf{W}$替换为一个普通的半正定对称矩阵$\mathbf{M}$，即得到了马氏距离：\[
+\operatorname{dist}_{\mathrm{mah}}^{2}\left(\boldsymbol{x}_{i}, \boldsymbol{x}_{j}\right)=\left(\boldsymbol{x}_{i}-\boldsymbol{x}_{j}\right)^{\mathrm{T}} \mathbf{M}\left(\boldsymbol{x}_{i}-\boldsymbol{x}_{j}\right)=\left\|\boldsymbol{x}_{i}-\boldsymbol{x}_{j}\right\|_{\mathbf{M}}^{2}
+\]
+其中$\mathbf{M}$亦称“度量矩阵”，度量学习的目标就是学习$\mathbf{M}$。
+
+欧氏距离的缺点是将各个方向视作同等重要，而马氏距离则能反映表面欧氏距离所不能反映的特征之间的相关性与特征尺度。
+}
+
+对$\mathbf{M}$进行学习需要设置目标。
+
+目标其一为\textbf{结合具体分类器的性能}，例如，以近邻分类器的性能为目标，即可得到经典的NCA算法；目标其二是\textbf{引入领域知识}，例如，可以通过建立“必连”（样本相似）与“勿连”（样本不相似）约束集合获得度量矩阵。
+
+\section{PCA 主成分分析} \label{sec:10.5}
+对于正交属性空间中的样本点，如果用一个超平面对所有样本进行恰当表达，则这个超平面应当具有如下的性质：
+\begin{itemize}
+    \item 最近重构性：样本点到这个超平面距离都足够近；
+    \item 最大可分性：样本点在这个超平面上的投影尽可能地分开。
+\end{itemize}
+
+可以根据这两种不同的性质，给出PCA的两种等价推导。
+
+\thm{最近重构性推导}{thm_ref}{假设数据样本进行了中心化（$\sum_i\boldsymbol x_i = 0$），且投影变换后得到的新坐标系为$\{\boldsymbol w_1,\boldsymbol w_2, \ldots,\boldsymbol w_d\}$；
+则通过丢弃一部分坐标将维度降低至$d'\lt d$，得到样本点$\boldsymbol x_i$在低维坐标系中的投影$\boldsymbol z_i = (z_{i1};z_{i2};\ldots;z_{id'}), \  z_{ij} = \boldsymbol w^\mathrm{T}_j\boldsymbol x_i，$基于$\boldsymbol z_i$来投影重构$\boldsymbol x_i$，可以得到$\hat{\boldsymbol x}_i = \sum_{j=1}^{d'}z_{ij}\boldsymbol w_j$。
+于是可以得到原样本点与基于投影重构的样本点之间的距离为：\[
+\begin{aligned} \sum_{i=1}^{m}\left\|\sum_{j=1}^{d^{\prime}} z_{i j} \boldsymbol{w}_{j}-\boldsymbol{x}_{i}\right\|_{2}^{2} & =\sum_{i=1}^{m} \boldsymbol{z}_{i}^{\mathrm{T}} \boldsymbol{z}_{i}-2 \sum_{i=1}^{m} \boldsymbol{z}_{i}^{\mathrm{T}} \mathbf{W}^{\mathrm{T}} \boldsymbol{x}_{i}+\text { const } \\ & \propto-\operatorname{tr}\left(\mathbf{W}^{\mathrm{T}}\left(\sum_{i=1}^{m} \boldsymbol{x}_{i} \boldsymbol{x}_{i}^{\mathrm{T}}\right) \mathbf{W}\right) .\end{aligned}
+\]
+$\boldsymbol w_j$为正交基，$\sum_i \boldsymbol x_i\boldsymbol x_i^T$是协方差矩阵，于是由最近重构性有：
+\[
+\min _{\mathbf{W}}-\operatorname{tr}\left(\mathbf{W}^{\mathrm{T}} \mathbf{X} \mathbf{X}^{\mathrm{T}} \mathbf{W}\right) \quad \text { s.t. } \mathbf{W}^{\mathrm{T}} \mathbf{W}=\mathbf{I} 
+\]
+这是主成分分析的优化目标。}
+
+\thm{最大可分性推导}{thm_ref}{样本点在新空间中超平面上的投影为$\mathbf{W}^\mathrm{T}\boldsymbol x_i$，若所有样本点的投影尽可能分开，则应该使得投影后样本点的方差最大化。
+
+投影后样本的协方差矩阵为$\sum_i\mathbf{W}^\mathrm{T}\boldsymbol x_i\boldsymbol x_i^\mathrm{T}\mathbf{W}$，故优化目标为：\[
+\max _{\mathbf{W}} \ \operatorname{tr}\left(\mathbf{W}^{\mathrm{T}} \mathbf{X} \mathbf{X}^{\mathrm{T}} \mathbf{W}\right) \quad \text { s.t. } \mathbf{W}^{\mathrm{T}} \mathbf{W}=\mathbf{I} 
+\]
+不难看出，最大可分性推导出的优化目标与最近重构性的等价。
+}
+
+对求解得到的优化目标使用拉格朗日乘子法可得\[
+\mathbf{X} \mathbf{X}^{\mathrm{T}} \mathbf{W}=\lambda \mathbf{W}
+\]
+
+此时对$\mathbf{X} \mathbf{X}^{\mathrm{T}}$做特征值分解，并对求得的特征值排序，取前$d'$大的特征值对应的特征向量构成$\mathbf{W} = (\boldsymbol w_1, \boldsymbol w_2,\ldots, \boldsymbol w_{d'})$，这就是主成分分析的解。$d'$的选取可以是用户指定、交叉验证的结果或者设置重构阈值得到的结果。
+
+\textbf{PCA是最常用的降维方法}。例如，在人脸识别中，该技术被称之为\textbf{特征脸}。
+
+\section{本章往年考试题目}\label{sec:10.5}
+
+\ex{2018，19，20，21，23年考试原题}{ex_ref}{PCA的最近重构性与最大可分性是如何推导得到优化目标的？}
+见\ref{sec:10.5}节。
+
+\ex{2019年考试原题}{ex_ref}{特征脸是什么，特征脸对降维有什么帮助？}
+特征脸是主成分分析在人脸识别中的别称。
+
+特征脸在降维的过程中能够增大样本的采样密度，且一定程度上起到降噪的作用。
+
+\ex{2019年考试原题}{ex_ref}{马氏距离表达式，M矩阵的要求，马氏距离和欧式距离的关系？}
+见\ref{sec:10.4}节。
+
+\ex{2022年考试原题}{ex_ref}{维度灾难是什么？ISOMAP、LLE的过程和思想？}
+维度灾难：高维空间给距离的计算带来很大的麻烦；当维数很高时，甚至连计算内积都不再容易；更严重的是，样本变得稀疏，近邻容易不准。
+
+ISOMAP、LLE的详细内容请见\ref{sec:10.3}节。

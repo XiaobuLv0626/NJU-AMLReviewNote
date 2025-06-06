@@ -1,0 +1,156 @@
+\chapter{线性模型}
+\begin{importantbox}
+从本章开始，一系列公式可能会要求推导。限于作者精力，复习讲义不提供完整推导，仅提供部分参考步骤与提示。推荐查看南瓜书《机器学习公式详解》以获得对应推导的详细过程。
+\end{importantbox}
+\section{基本思想}\label{sec:2.1}
+线性模型的基本思想是，对于一个由$d$个属性描述的示例$\boldsymbol{x}=\left(x_{1} ; x_{2} ; \ldots ; x_{d}\right)$，学习得到一个属性的线性组合用于预测的函数，即
+\[
+f(\boldsymbol{x})=w_{1} x_{1}+w_{2} x_{2}+\ldots+w_{d} x_{d}+b
+\]
+一般用向量形式写作：
+\[
+f(\boldsymbol{x})=\boldsymbol{w}^{\mathrm{T}} \boldsymbol{x}+b, 
+\boldsymbol{w}=\left(w_{1} ; w_{2} ; \ldots ; w_{d}\right)
+\]
+\marginpar{\footnotesize 线性模型中的w直观表达了各属性在预测中的重要性，使线性模型具有较好的可解释性。}
+线性模型的问题在于，如何确定$w$与$b$的值，使得线性模型拥有良好的性能。
+
+\section{线性回归任务}\label{sec:3.2}
+在最简单的情形（即输入只有一个属性的情况下），线性回归试图习得\[
+f(x_i)=wx_i+b,\ s.t. \ f(x_i) \simeq y_i
+\]
+线性回归通过均方误差最小化确定w与b，这种基于均方误差最小化来求解模型的方法被称为\textbf{最小二乘法}。
+
+\thm{最小二乘法}{thm_ref}{\[
+\begin{aligned}\left(w^{*}, b^{*}\right) & =\underset{(w, b)}{\arg \min } \sum_{i=1}^{m}\left(f\left(x_{i}\right)-y_{i}\right)^{2} \\ & =\underset{(w, b)}{\arg \min } \sum_{i=1}^{m}\left(y_{i}-w x_{i}-b\right)^{2}\end{aligned}
+\]
+为使上式$E_{(w,b)}=\sum_{i=1}^m(y_i-wx_i-b)^2$对应的值最小化，将$E_{(w,b)}$分别对w与b求导得到：
+\[
+\begin{aligned}\frac{\partial E_{(w, b)}}{\partial w} & =2\left(w \sum_{i=1}^{m} x_{i}^{2}-\sum_{i=1}^{m}\left(y_{i}-b\right) x_{i}\right) \\ \frac{\partial E_{(w, b)}}{\partial b}& =2\left(m b-\sum_{i=1}^{m}\left(y_{i}-w x_{i}\right)\right)\end{aligned}
+\]
+令上述两个公式等于零，可得到w与b的闭式解。
+\[
+\begin{aligned} w &=\frac{\sum_{i=1}^{m} y_{i}\left(x_{i}-\bar{x}\right)}{\sum_{i=1}^{m} x_{i}^{2}-\frac{1}{m}\left(\sum_{i=1}^{m} x_{i}\right)^{2}} \\ b&=\frac{1}{m} \sum_{i=1}^{m}\left(y_{i}-w x_{i}\right)\end{aligned}
+\]
+}
+\marginpar{\footnotesize 上述推导的提示：先得到b的闭式解，再代入w的公式内。}
+
+更一般的情形是，样本由$d$个属性描述，此时我们试图学习的是\[
+f\left(\boldsymbol{x}_{i}\right)=\boldsymbol{w}^{\mathrm{T}} \boldsymbol{x}_{i}+b,\ s.t. \ 
+f\left(\boldsymbol{x}_{i}\right) \simeq y_{i}
+\]
+这被称之为多元线性回归。
+
+多元线性回归的做法是将$w$与$b$吸收入向量形式，得到一个统一向量用于后续计算：$\hat{\boldsymbol{w}} = (\boldsymbol{w};b)=(w_1;...;w_d;b)\in \mathbb{R}^{(d+1)\times 1}$，同时增加一个表示形式$\hat{\boldsymbol{x}} =(x_1;...;x_d;1)\in \mathbb{R}^{(d+1)\times 1}$，将数据集D表示为一个矩阵：
+\[\boldsymbol{X} = \left(\begin{array}{ccccc}x_{11} & x_{12} & \cdots & x_{1 d} & 1 \\ x_{21} & x_{22} & \cdots & x_{2 d} & 1 \\ \vdots & \vdots & \ddots & \vdots & \vdots \\ x_{m 1} & x_{m 2} & \cdots & x_{m d} & 1\end{array}\right)=\left(\begin{array}{cc}\boldsymbol{x}_{1}^{\mathrm{T}} & 1 \\ \boldsymbol{x}_{2}^{\mathrm{T}} & 1 \\ \vdots & \vdots \\ \boldsymbol{x}_{m}^{\mathrm{T}} & 1\end{array}\right) = \left[\begin{array}{c}\hat{\boldsymbol{x}}_{1}^{\mathrm{T}} \\ \vdots \\ \hat{\boldsymbol{x}}_{m}^{\mathrm{T}}\end{array}\right] \in \mathbb{R}^{m \times (d+1)}\]
+\marginpar{\footnotesize 推导的提示：对简单最小二乘法中的$wx_i+b$整体代换为$\boldsymbol{w}^Tx_i+b$，然后替换为向量形式，改写为向量内积并提取$X$。}
+于是类似最小二乘法，我们可以得到：\[
+\hat{\boldsymbol{w}}^{*}=\underset{\hat{\boldsymbol{w}}}{\arg \min }(\boldsymbol{y}-\mathbf{X} \hat{\boldsymbol{w}})^{\mathrm{T}}(\boldsymbol{y}-\mathbf{X} \hat{\boldsymbol{w}})
+\]
+\marginpar{\footnotesize 推导的提示：展开并使用矩阵微分公式$ \frac{\partial \boldsymbol{a}^{\mathrm{T}} \boldsymbol{x}}{\partial \boldsymbol{x}}=\frac{\partial \boldsymbol{x}^{\mathrm{T}} \boldsymbol{a}}{\partial \boldsymbol{x}}=\boldsymbol{a}, \frac{\partial \boldsymbol{x}^{\mathrm{T}} \mathbf{A} \boldsymbol{x}}{\partial \boldsymbol{x}}=\left(\mathbf{A}+\mathbf{A}^{\mathrm{T}}\right) \boldsymbol{x} $。}
+令$ E_{\hat{\boldsymbol{w}}}=(\boldsymbol{y}-\mathbf{X} \hat{\boldsymbol{w}})^{\mathrm{T}}(\boldsymbol{y}-\mathbf{X} \hat{\boldsymbol{w}}) $，对$\hat{\boldsymbol{w}}$求导可得：
+\[
+\frac{\partial E_{\hat{\boldsymbol{w}}}}{\partial \hat{\boldsymbol{w}}}=2 \mathbf{X}^{\mathrm{T}}(\mathbf{X} \hat{\boldsymbol{w}}-\boldsymbol{y})
+\]
+
+令上式为0，并根据矩阵的特征可得到闭式解。
+\begin{itemize}
+    \item $\mathbf{X}^T\mathbf{X}$满秩或正定，则$ \hat{\boldsymbol{w}}^{*}=\left(\mathbf{X}^{\mathbf{T}} \mathbf{X}\right)^{-1} \mathbf{X}^{\mathrm{T}} \boldsymbol{y} $，$ f\left(\hat{\boldsymbol{x}}_{i}\right)=\hat{\boldsymbol{x}}_{i}^{\mathrm{T}}\left(\mathbf{X}^{\mathrm{T}} \mathbf{X}\right)^{-1} \mathbf{X}^{\mathrm{T}} \boldsymbol{y} $。
+    \item 若不正定，则引入对应的正则化项。
+\end{itemize}
+
+\section{二分类任务}\label{sec:3.3}
+对于二分类任务而言，其输出标记$y\in \{0,1\}$，需要寻找将线性模型$z = \boldsymbol{w}^\mathrm{T}\boldsymbol{x}+b$的实值转换为0/1值的函数。
+
+\begin{itemize}
+    \item 单位阶跃函数：$ y=\left\{\begin{aligned} 0, & z<0 \\ 0.5, & z=0 \\ 1, & z>0\end{aligned}\right. $
+    但实际上该函数不连续不可导。
+    \item 对数几率函数：\[
+        y=\frac{1}{1+e^{-z}}\]
+    该函数任意阶可导，将其带入广义线性模型公式$y = g^{-1}(\boldsymbol{w}^\mathrm{T}\boldsymbol{x}+b)$可得：
+    \[
+    y=\frac{1}{1+e^{-(\boldsymbol{w}^\mathrm{T}\boldsymbol{x}+b)}}\]
+\end{itemize}
+
+可以认为$y$是样本$\boldsymbol{x}$为正例的可能性，$1–y$为样本为负例的可能性，两者的比值$\frac{y}{1-y}$即为几率，反应了样本为正的相对可能性。
+对上述公式取对数可以得到：
+\[
+\ln\frac{y}{1-y} = \boldsymbol{w}^\mathrm{T}\boldsymbol{x}+b
+\]
+
+可以发现实际上是在用线性回归模型结果预测对数概率，因此该模型称为“对数几率回归”。
+
+\marginpar{\footnotesize 下列推导的提示：简写两个条件概率，将$p(y_i| \boldsymbol x_i; \boldsymbol w_i, b)$带入对数似然中，再利用$y_i$取值仅为0或1简化。}
+
+\thm{极大似然法}{thm_ref}{对于对数几率回归而言，我们一般通过将$y$视为后验概率估计$p(y=1|x)$的方式重写上式：\[
+\ln \frac{p(y=1 \mid \boldsymbol{x})}{p(y=0 \mid \boldsymbol{x})}=\boldsymbol{w}^{\mathrm{T}} \boldsymbol{x}+b
+\]
+\[
+\begin{aligned}p(y=1 \mid \boldsymbol{x})=\frac{e^{\boldsymbol{w}^{\mathrm{T}} \boldsymbol{x}+b}}{1+e^{\boldsymbol{w}^{\mathrm{T}} \boldsymbol{x}+b}} \\ p(y=0 \mid \boldsymbol{x})=\frac{1}{1+e^{\boldsymbol{w}^{\mathrm{T}} \boldsymbol{x}+b}} \end{aligned}
+\]
+因此，对于给定数据集$\{(x_i,y_i)\}_{i=1}^{m}$，我们最大化对数似然：
+\[
+\ell(\boldsymbol{w}, b)=\sum_{i=1}^{m} \ln p\left(y_{i} \mid \boldsymbol{x}_{i} ; \boldsymbol{w}, b\right)
+\]
+令$ \boldsymbol{\beta}=(\boldsymbol{w} ; b), \hat{\boldsymbol{x}}=(\boldsymbol{x} ; 1) $，于是 $ \boldsymbol{w}^\mathrm{T}\boldsymbol{x}+b $简写为$\boldsymbol{\beta}^\mathrm{T}\hat{\boldsymbol x}$。
+再令$ p_{1}\left(\hat{\boldsymbol{x}}_{i} ; \boldsymbol{\beta}\right)=p(y=1 \mid \hat{\boldsymbol{x}} ; \boldsymbol{\beta}), \  p_{0}\left(\hat{\boldsymbol{x}}_{i} ; \boldsymbol{\beta}\right)=p(y=0 \mid \hat{\boldsymbol{x}} ; \boldsymbol{\beta})=1-p_{1}\left(\hat{\boldsymbol{x}}_{i} ; \boldsymbol{\beta}\right) $，可得\[
+p\left(y_{i} \mid \boldsymbol{x}_{i} ; \boldsymbol{w}_{i}, b\right)=y_{i} p_{1}\left(\hat{\boldsymbol{x}}_{i} ; \boldsymbol{\beta}\right)+\left(1-y_{i}\right) p_{0}\left(\hat{\boldsymbol{x}}_{i} ; \boldsymbol{\beta}\right)
+\]
+\[
+\ell(\boldsymbol{\beta})=\sum_{i=1}^{m}\left(-y_{i} \boldsymbol{\beta}^{\mathrm{T}} \hat{\boldsymbol{x}}_{i}+\ln \left(1+e^{\beta^{\mathrm{T}} \hat{\boldsymbol{x}}_{i}}\right)\right)
+\]
+使用牛顿法迭代求解该高阶可导连续函数，得到：
+\[
+\boldsymbol{\beta}^{*}=\underset{\boldsymbol{\beta}}{\arg \min } \ell(\boldsymbol{\beta})
+\]
+第t+1轮迭代解的更新公式：
+\[
+\boldsymbol{\beta}^{t+1}=\boldsymbol{\beta}^{t}-\left(\frac{\partial^{2} \ell(\boldsymbol{\beta})}{\partial \boldsymbol{\beta} \partial \boldsymbol{\beta}^{\mathrm{T}}}\right)^{-1} \frac{\partial \ell(\boldsymbol{\beta})}{\partial \boldsymbol{\beta}}
+\]
+}
+
+\section{多分类任务}\label{sec:3.4}
+
+考虑N个类别$C_1,C_2,...,C_N$，多分类任务的基本思路是“拆解法”，将任务拆解为若干个二分类任务进行求解，为拆解子任务训练分类器并集成得到多分类结果。
+给定数据集$
+D= \{ (\boldsymbol x_1,y_1),(\boldsymbol x_2,y_2),... (\boldsymbol x_m,y_m) \}, y_i\in\{C_1, C_2,...,C_N \}
+$,
+\begin{itemize}
+    \item 一对一OvO：将所有类别两两配对，生成$frac{N(N-1)}{2}$个二类任务与对应的学习分类器。在测试阶段，得到$frac{N(N-1)}{2}$个分类结果，投票取出现次数最多的结果作为最终类别。训练时间短但存储和测试开销大。
+    \item 一对其余OvR：每次将一个类作为正例，其他所有类作为反例训练N个分类器。测试时若只有一个分类器的输出为正类，则对应类别标记作为最终分类结果，否则使用置信度最大的类别作为最终类别。训练时间长但存储测试开销小。
+    \item 多对多：每次将若干个类作为正类，若干个其他类别作为反类。需要对正反类的选择做特殊设计。一种框架为纠错输出码，通过对N个类别做M次划分得到类别长度为M的编码，测试时计算M个分类器组成的编码与已存在编码之间的距离得到类别。一般来说，编码越长，纠错能力越强。
+\end{itemize}
+
+\begin{figure}[!htbp]
+	\centering
+		\sidecaption{一对一与一对其余的示例\label{fig:4.1}}{\includegraphics[width=.9\textwidth]{images/OVOVR.png}}
+\end{figure}
+
+\begin{figure}[!htbp]
+	\centering
+		\sidecaption{纠错输出码的示例。海明距离 = 欧氏距离的平方/4\label{fig:4.2}}{\includegraphics[width=.8\textwidth]{images/ECOC.png}}
+\end{figure}
+
+\section{线性模型总结}\label{sec:3.5}
+线性模型的优点是：形式简单，易于建模，具有一定的可解释性。
+
+线性模型的缺点是：难以处理非线性问题。
+
+线性模型是许多非线性模型的基础，如神经网络（层级结构）或支持向量机（高维映射）。
+
+\section{本章往年考试题目}\label{sec:3.6}
+
+\ex{2021年考试原题}{ex_ref}{推导最小二乘法。}
+过程略，详见\ref{sec:3.2}节。
+
+\ex{2022年考试原题}{ex_ref}{最小二乘法的限制？}
+\begin{itemize}
+    \item 对数据的噪声敏感
+    \item 无法处理不平衡数据
+    \item 无法处理线性不可分的数据
+    \item 不适用于高维稀疏数据
+    \item 缺乏概率输出，在一些场景下无法满足需求
+\end{itemize}
+
+\ex{2023年考试原题}{ex_ref}{推导多元线性回归的闭式解，并详述线性模型的优缺点。}
+见\ref{sec:3.2}节与\ref{sec:3.5}节。

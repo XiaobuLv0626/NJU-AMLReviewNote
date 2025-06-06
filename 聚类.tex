@@ -1,0 +1,136 @@
+\chapter{聚类}
+
+\section{聚类任务}\label{sec:9.1}
+\textbf{聚类}是一种典型的\textbf{无监督学习}，通过对无标记的数据集的学习将数据样本划分为若干个通常不相交的“簇”。
+
+聚类可以揭示数据的内在性质与规律，也作为分类学习任务中提取特征，判断类别的重要支撑。
+
+\section{性能度量}\label{sec:9.2}
+
+聚类的性能度量也被称之为“有效性指标”，用于评估聚类结果的好坏。
+
+一个好的聚类结果，要求其“簇内相似度”高而“簇间相似度”低。
+
+聚类性能度量大致有两类：
+\begin{itemize}
+    \item \textbf{外部指标}：将聚类结果与某个参考模型进行比较，例如Jaccard系数或FM指数。
+    \item \textbf{内部指标}：对聚类结果直接进行考察，例如DB指数或Dunn指数。
+\end{itemize}
+
+\section{距离计算}\label{sec:9.3}
+聚类的本质是划分，分组来自于合理的度量，而度量来自于距离，因此距离是聚类重要的本质。
+
+一个距离度量需要满足的基本性质包括：
+\begin{itemize}
+    \item 非负性：$\operatorname{dist}(\boldsymbol x_i,\boldsymbol x_j) \ge 0$；
+    \item 同一性：$\operatorname{dist}(\boldsymbol x_i, \boldsymbol x_j) = 0, \; \operatorname{iff} \;\boldsymbol x_i = \boldsymbol x_j$
+    \item 对称性：$\operatorname{dist}(\boldsymbol x_i, \boldsymbol x_j) = \operatorname{dist}(\boldsymbol x_j, \boldsymbol x_i)$
+    \item 直递性：$\operatorname{dist}(\boldsymbol x_i, \boldsymbol x_j) \le \operatorname{dist}(\boldsymbol x_i, \boldsymbol x_k) + \operatorname{dist}(\boldsymbol x_k, \boldsymbol x_j)$
+\end{itemize}
+
+给定样本$\boldsymbol x_i = (x_{i 1};x_{i 2};...;x_{in})$与$\boldsymbol x_j = (x_{j 1};x_{j 2};...;x_{jn})$，若样本属性有序，常用的距离度量为\textbf{闵可夫斯基距离}：\[
+\operatorname{dist}_{m k}\left(x_{i}, x_{j}\right)=\left(\sum_{u=1}^{n}\left|x_{i u}-x_{j u}\right|^{p}\right)^{\frac{1}{p}}
+\]
+
+当$P=1$时，闵可夫斯基距离即为曼哈顿距离；$P=2$时即为欧式距离。
+
+当样本属性无序时，可使用\textbf{VDM}，令$m_{u,a}$表示属性$u$上取值为$a$的样本数，$m_{u,a,i}$表示在第$i$个样本簇上属性$u$上取值为$a$的样本数，$k$为样本簇数，则属性$u$上两个离散值a与b之间的VDM距离为：
+\[
+V D M_{p}(a, b)=\sum_{i=1}^{k}\left|\frac{m_{u, a, i}}{m_{u, a}}-\frac{m_{u, b, i}}{m_{u, b}}\right|^{p}
+\]
+
+将闵可夫斯基距离与VDM结合使用可以处理混合属性，假设有$n_c$个有序属性，$n-n_c$个无序属性，令有序属性在无序属性之前，则有\[
+\operatorname{MinkovDM}_{p}\left(\boldsymbol{x}_{i}, \boldsymbol{x}_{j}\right)=\left(\sum_{u=1}^{n_{c}}\left|x_{i u}-x_{j u}\right|^{p}+\sum_{u=n_{c}+1}^{n} \operatorname{VDM}_{p}\left(x_{i u}, x_{j u}\right)\right)^{\frac{1}{p}}
+\]
+
+\section{原型聚类}\label{sec:9.4}
+原型聚类，也被称为“基于原型的聚类”，其假设聚类结构能够\textbf{通过一组原型刻画}。
+
+\subsection{K-means聚类}\label{sec:9.4.1}
+K-均值算法以均值向量$\boldsymbol \mu_i = \frac{1}{|C_i|}\sum_{\boldsymbol x\in C_i}\boldsymbol x$为原型，其算法大致流程为：
+\begin{enumerate}
+    \item 随机选取k个样本点作为簇中心;
+    \item 将其他样本点根据其与簇中心的距离，划分给最近的簇;
+    \item 更新各簇的均值向量，将其作为新的簇中心；
+    \item 若簇中心未发生更改则停止，否则返回第2步。
+\end{enumerate}
+
+\subsection{学习向量量化LVQ}
+学习向量量化假设数据样本带有类别标记，通过学习的方式尝试找到一组原型向量刻画聚类结构。
+
+通过聚类来形成类别的“子类”结构；每个聚类对应于类别的一个子类
+
+\subsection{高斯混合聚类}
+高斯混合聚类采用概率模型来表达聚类原型，具体而言，使用高斯概率分布：
+
+对于n维样本空间$\mathcal{X}$中的随机向量$\boldsymbol x$，若其服从高斯分布，则其概率密度函数为：\[
+p(\boldsymbol{x})=\frac{1}{(2 \pi)^{\frac{n}{2}}|\boldsymbol{\Sigma}|^{\frac{1}{2}}} e^{-\frac{1}{2}(\boldsymbol{x}-\boldsymbol{\mu})^{\mathrm{T}} \boldsymbol{\Sigma}^{-1}(\boldsymbol{x}-\boldsymbol{\mu})}
+\]
+基于此可以定义高斯混合分布：
+\[
+p_{\mathcal{M}}(\boldsymbol{x})=\sum_{i=1}^{k} \alpha_{i} \cdot p\left(\boldsymbol{x} \mid \boldsymbol{\mu}_{i}, \boldsymbol{\Sigma}_{i}\right)
+\]
+
+在这种情况下，样本的生成过程为：首先根据$\alpha_1, \alpha_2, ...,\alpha_k$定义的先验分布选择高斯混合成分，其中$\alpha_i$为选择第i个混合成分的概率；然后根据被选择的混合成分的概率密度函数进行采样, 从而生成对应的样本。
+
+
+
+\section{密度聚类}\label{sec:9.5}
+
+原型聚类，也被称为“基于密度的聚类”，其假设聚类结构能够通过样本分布之间的\textbf{紧密程度}确定。这类方法从样本密度的角度来考察样本之间的可连接性，并基于可连接样本不断扩展聚类簇。
+
+代表算法：DBSCAN, OPTICS, DENCLUE
+
+\subsection{DBSCAN}
+DBSCAN基于一组“邻域”参数$(\epsilon, MinPts)$刻画样本分布的紧密程度，其核心思想在于通过邻域建立样本间的可达路径并形成联通分支（等价类）。
+其关键概念为：
+\begin{itemize}
+    \item 核心对象(core object)：若$\boldsymbol x_j$的 $\epsilon$-邻域至少包含 $MinPts$ 个样本，形式化表达为$|N_\epsilon(\boldsymbol x_j)| \ge MinPts$，则$\boldsymbol x_j$是一个核心对象。
+    \item 密度直达(directly density-reachable)：若$\boldsymbol x_j$位于$\boldsymbol x_i$的$\epsilon$-邻域中,且$\boldsymbol x_i$是核心对象,则称$\boldsymbol x_j$由$\boldsymbol x_i$密度直达;
+    \item 密度可达(density-reachable)：对$\boldsymbol x_i$与$\boldsymbol x_j$,若存在样本序列$\boldsymbol p_1, \boldsymbol p_2,...,\boldsymbol p_n$,其中$\boldsymbol p_1 = \boldsymbol x_i, \boldsymbol p_n = \boldsymbol x_j$且 $p_{i+1}$ 由 $p_i$ 密度直达, 则称 $\boldsymbol x_j$由 $\boldsymbol x_i$密度可达。
+    \item 密度相连(density-connected):对 $\boldsymbol x_i$与$\boldsymbol x_j$, 若存在 $\boldsymbol x_k$使得$\boldsymbol x_i$与$\boldsymbol x_j$均由$x_k$密度可达,则称$\boldsymbol x_i$与$\boldsymbol x_j$密度相连。
+\end{itemize}
+
+由此，DBSCAN将“簇”定义为：由密度可达关系导出的最大密度相连样本集合。
+
+\section{层次聚类}\label{sec:9.6}
+层次聚类假设数据集能够产生不同粒度的聚类结构，这类方法试图在不同层次上对数据集进行划分，形成树形的聚类结构。
+
+代表算法：AGNES（自底向上），DIANA（自顶向下）。
+
+\subsection{AGNES}
+AGNES首先将数据集中的每个样本看作一个初始聚类簇，然后不断找出聚类最近的两个聚类簇进行合并，直至所有的数据均属于一个簇为止。通过对生成的树状图在不同尺度上进行分割，可以得到相应的簇划分结果。
+
+\section{本章往年考试题目}\label{sec:9.7}
+
+\ex{2022年考试原题}{ex_ref}{阐述k均值聚类的思想；在算法中，随机选择k个簇中心这一步怎么优化？簇中心的个数k应当怎么选？}
+
+K均值聚类的思想详见\ref{sec:9.4.1}。
+
+K均值聚类的优化：
+\begin{itemize}
+    \item \textbf{K-Means++}：首先随机选择一个数据点作为第一个初始聚类中心，然后对于每个未被选择的数据点，计算其与已有聚类中心之间的最小距离，并根据该距离的概率分布选择下一个聚类中心。通过这种方式，K-means++算法能够使得初始聚类中心之间距离较远，从而避免陷入局部最优解。
+    \item \textbf{基于密度的初始化}：基于密度的初始化方法考虑数据点的分布密度，选择密度较高的区域作为初始聚类中心。这种方法能够更好地反映数据的内在结构，使得聚类结果更加合理。一种常见的基于密度的初始化方法是选择局部密度峰值作为初始聚类中心。
+\end{itemize}
+
+K的选择：
+\begin{itemize}
+    \item \textbf{轮廓系数}：轮廓系数是一种评估聚类效果的指标，它综合考虑了同一聚类内数据点的紧凑度和不同聚类间数据点的分离度。通过计算不同K值下的轮廓系数，可以选择使得轮廓系数最大的K值作为最优聚类数。
+    \item \textbf{肘部法则}：肘部法则通过观察聚类误差平方和（SSE）随K值变化的曲线来确定最优聚类数。当K值较小时，增加K值会显著降低SSE；而当K值达到某个阈值后再增加K值对SSE的降低效果不再明显。这个阈值对应的K值即为最优聚类数。
+\end{itemize}
+
+
+\ex{2018年考试原题·附加题}{ex_ref}{写出距离度量的四个性质，并证明闵可夫斯基距离满足这些性质。}
+\ex{2020年考试原题}{ex_ref}{写出闵可夫斯基距离的表达式，并阐述距离度量需要满足的条件，给出欧式距离与闵可夫斯基距离的关联。}
+非负性与对称性由绝对值可知显然。
+
+同一性$x=y \Rightarrow d(x, y)=0$显然，反向则有：\[
+\sum_{i=1}^{n}\left|x_{i}-y_{i}\right|^{p}=0 \Rightarrow \forall i,\left|x_{i}-y_{i}\right|=0 \Rightarrow x_{i}=y_{i} \Rightarrow x=y
+\]
+
+直递性证明较为复杂，其正确性由Minkowski不等式保证，本身是从Hölder不等式推出的，此处忽略。
+
+欧式距离 = 闵可夫距离取P等于2的特值。
+
+\ex{2023年考试原题}{ex_ref}{写出密度聚类和层次聚类的代表性算法及步骤，并分别说明其关键假设。}
+见\ref{sec:9.5}与\ref{sec:9.6}节。

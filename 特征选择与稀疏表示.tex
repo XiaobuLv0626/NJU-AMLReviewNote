@@ -1,0 +1,114 @@
+\chapter{特征选择与稀疏表示}
+
+\section{子集搜索与评价}\label{sec:11.1}
+对于一个学习任务，给定属性集（我们将属性称为“特征”），我们将对当前学习任务有用的属性称为\textbf{相关特征}，无用的属性称为\textbf{无关特征}，通过其他特征可以推演出来的特征称为\textbf{冗余特征}。
+
+从给定的特征集合中选择出相关特征子集，而不丢弃重要特征的过程称为\textbf{特征选择}。进行特征选择的原因在于，其一、使用部分特征能有效减轻维数灾难问题；其二、去除不相关属性能降低学习任务难度。
+
+在特征选择的过程中，涉及到两个关键环节：如何根据选择的特征子集的评价结果，获取下一个特征子集；如何评价选择的特征子集的好坏。
+
+\textbf{子集搜索}解决的是第一个环节的问题，其策略包括：
+\begin{itemize}
+    \item \textbf{前向搜索}：将每个特征看作一个候选子集，不断将单个特征加入选择集合，直至效果不如增加前。
+    \item \textbf{后向搜索}：从完整的特征集合开始，每次尝试去掉一个无关特征，直至无法再去除。
+    \item \textbf{双向搜索}：每一轮增加选定相关特征并去除无关特征。
+\end{itemize}
+\marginnote{\footnotesize 不难发现上述策略都是贪心的。}
+
+\textbf{子集评价}解决的是第二个环节的问题，我们通过计算每一个特征子集的信息增益作为子集的评价准则，\[
+\begin{aligned}
+    \operatorname{Gain}(A) & =\operatorname{Ent}(D)-\sum_{v=1}^{V} \frac{\left|D^{v}\right|}{|D|} \operatorname{Ent}\left(D^{v}\right) \\
+    \operatorname{Ent}(D) & = -\sum_{i=1}^{|\mathcal{Y}|} p_k\log_2p_k
+\end{aligned}
+\]信息增益越大，特征子集包含的有助于分类的信息越多。
+
+\section{过滤式选择}\label{sec:11.2}
+过滤式选择方法先\textbf{对数据集进行特征选择}，再训练学习器，特征选择过程与后续学习器无关。
+这种方法的经典代表为Relief算法，通过设计\textbf{“相关统计量”}来度量特征的重要性。
+
+对于Relief算法而言，给定训练集$\{(\boldsymbol x_1, y_1), (\boldsymbol x_2, y_2), \ldots,(\boldsymbol x_m, y_m) \}$，对每个示例$\boldsymbol x_i$，算法找到其同类样本中的最近邻$\boldsymbol x_{i,nh}$与异类样本中的最近邻$\boldsymbol x_{i,nm}$作为猜中近邻near-hit与猜错近邻near-miss，并计算相关统计量针对属性$j$的分量：
+\[
+\delta^{j}=\sum_{i}-\operatorname{diff}\left(x_{i}^{j}, x_{i, \mathrm{nh}}^{j}\right)^{2}+\operatorname{diff}\left(x_{i}^{j}, x_{i, \mathrm{~nm}}^{j}\right)^{2}
+\]
+其中diff表示两者之间的差距（距离），$x_a^j$代表样本$\boldsymbol x_a$在属性$j$上的取值。
+
+\marginnote{\footnotesize Relief主要用于二分类问题，运行效率很高，其变体Relief-F可以处理多分类问题，本笔记略过。}
+从上述描述可知，若猜中近邻与$\boldsymbol x_i$的距离小于猜错近邻与$\boldsymbol x_i$的距离，则说明该属性对于区分同类异类是有益的，应增大该统计量分量；否则则减小。最终对基于不同样本得到的估计结果做平均，分量值越大，该属性分类能力越强。
+
+\section{包裹式选择}\label{sec:11.3}
+
+包裹式选择直接将\textbf{最终使用的学习器性能}作为特征子集的评价准则，其目的是为了给学习器选择最有利于其性能发挥的特征子集。从最终学习器性能来看，包裹式强于过滤式。但由于需要多次训练学习器，计算开销一般大得多。
+
+这类选择法的代表为LVW算法。其通过在循环的每一轮随机产生一个特征子集，通过交叉验证推断当前特征子集的误差，并不断循环，在多个随机产生的特征子集中选择误差最小的特征子集作为最终解。
+
+\section{嵌入式选择与L1正则化}\label{sec:11.4}
+嵌入式特征选择是将\textbf{特征选择过程与学习器训练过程融为一体}，两者在同一个优化过程中完成。
+
+给定数据集$D=\{ (\boldsymbol x_1, y_1),(\boldsymbol x_2, y_2), \ldots,(\boldsymbol x_m, y_m)\}$，考虑最简单的线性回归模型，以平方误差为损失函数，则优化目标为：
+\[
+\min _{\boldsymbol{w}} \sum_{i=1}^{m}\left(y_{i}-\boldsymbol{w}^{\top} \boldsymbol{x}_{i}\right)^{2}
+\]
+特征较多而样本数相对较少时，容易陷入过拟合，此时可以引入正则化项：
+\[
+\begin{aligned}
+引入L2正则项 & ：\min _{\boldsymbol{w}} \sum_{i=1}^{m}\left(y_{i}-\boldsymbol{w}^{\top} \boldsymbol{x}_{i}\right)^{2}+\lambda\|\boldsymbol{w}\|_{2}^{2} \\
+引入L1正则项 & ：\min _{\boldsymbol{w}} \sum_{i=1}^{m}\left(y_{i}-\boldsymbol{w}^{\top} \boldsymbol{x}_{i}\right)^{2}+\lambda\|\boldsymbol{w}\|_{1}
+\end{aligned}
+\]
+
+前者被称之为\textbf{岭回归}，后者被称之为\textbf{LASSO}。
+
+使用L1范数正则化的好处是，更容易获得稀疏解，求得的$\boldsymbol w$会有更少的非零分量。
+
+\begin{figure}[!htbp]
+	\centering
+		\sidecaption{假设$\boldsymbol x$仅有两个属性，基于这两个属性做坐标轴画出的范数等值线。\label{fig:11.1}}{\includegraphics[width=.8\textwidth]{images/L1.png}}
+\end{figure}
+
+引入正则化项之后，解要在平方误差项与正则化项中做折中，即出现在平方误差项等值线与正则化项等值线相交处。从图\ref{fig:11.1}中可以看出，$L_1$范数时常出现在坐标轴上，可以产生$w_1$或者$w_2$为0的稀疏解。
+
+基于L1正则化的结果是得到了仅采用一部分初始特征的模型，可以认为L1正则化学习就是一种嵌入式特征选择方法。
+
+\section{稀疏表示}\label{sec:11.5}
+把数据集$D$考虑为一个矩阵，其每行对应于一个样本，每列对应一个特征，特征选择所考虑的问题是\textbf{特征具有稀疏性}，可以通过特征选择去除这些列，使学习器训练过程仅需要在较小的矩阵上进行。另外一种稀疏性是，矩阵中有很多个零元素，且并非整行整列的出现，如字频矩阵（行对应文档，列对应字词，交汇处为出现频率）。
+
+稀疏表达的优势是：文本数据使用字频表示后能够使大多数问题变得线性可分；稀疏样本能够高效存储。
+
+基于稀疏表达的优势，给定稠密表示的数据集$D$，为这个样本找到合适的字典，将其转化为稀疏表示的这一过程称为\textbf{字典学习}。
+
+具体而言，给定数据集$\{\boldsymbol x_1, \boldsymbol x_2,\ldots, \boldsymbol x_m\}, \boldsymbol x_i \in \mathbb{R}^{n\times k}$，字典学习最简单的优化形式为：
+\[
+    \min_{\mathbf{B}, \boldsymbol \alpha_i} \sum_{i=1}^{m} \|\mathrm{x}_i - \mathbf{B}\boldsymbol \alpha_i \|^2_2 + \lambda\sum_{i=1}^{m}\|\boldsymbol \alpha_i\|_1,
+\]
+其中$B\in\mathbb{R}^{d\times k}$为对应的字典矩阵，$\boldsymbol \alpha_i \in \mathbb{R}^k$为样本对应的稀疏表示，我们学习得到上述两个表示。k为用户自定义的字典词汇量。
+
+矩阵补全希望通过已知的部分信息来获取全部信息，基于压缩感知的思想恢复出完整的信号，其对应形式为：
+
+\marginnote{\footnotesize 压缩感知的思想是基于信号本身的稀疏性从部分观测样本中恢复原信号，一般分为“感知测量”与“重构恢复”两方面。矩阵补全对应的是“重构恢复”方面。}
+\[
+\min _{X} \operatorname{rank}(X) \quad
+\quad X_{i j}=A_{i j},(i, j) \in \Omega
+\]
+
+这是一个NP难问题。
+
+\section{本章往年考试题目}\label{sec:11.6}
+
+\ex{2018年考试原题}{ex_ref}{子集搜索的方法是什么？子集评价的方法是什么？}
+详见\ref{sec:11.1}节。
+
+\ex{2019年考试原题}{ex_ref}{L1范数为什么可以得到稀疏解？参数$\lambda$对于稀疏解的影响是什么？}
+稀疏解的解释详见\ref{sec:11.4}节。
+
+$\lambda$是控制正则化强度的超参数，它决定了模型在拟合训练数据与参数稀疏性之间的权衡：它越大，模型越稀疏，越多属性会变为0；越小，模型越复杂，会保留越多的属性。
+
+\ex{2019/2022/2023年考试原题}{ex_ref}{特征选择的三种方法区别是什么？Relief算法属于哪种方法？LVW算法又属于哪种方法？}
+
+区别：
+\begin{itemize}
+    \item 嵌入式：将特征选择过程与学习器训练过程融为一体，两者在同一个优化过程中完成，在学习器中自动进行特征选择
+    \item 包裹式：将最终使用的学习器的性能作为特征子集的评价标准，为给定选择器选择最有利于其性能、“量身定做”的特征子集。
+    \item 过滤式：先用特征选择过程过滤原始数据，再用过滤后的特征来训练模型；特征选择过程和后续学习器无关。
+\end{itemize}
+嵌入式例子：L1正则化；包裹式例子：LVW；过滤式例子：Relief。
+

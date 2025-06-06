@@ -1,0 +1,172 @@
+\chapter{支持向量机}
+
+\section{间隔与支持向量}\label{sec:4.1}
+
+给定一个数据集$
+D=\left\{\left(\boldsymbol{x}_{1}, y_{1}\right),\left(\boldsymbol{x}_{2}, y_{2}\right), \ldots,\left(\boldsymbol{x}_{m}, y_{m}\right)\right\}, y_{i} \in\{-1,+1\}$，分类学习希望在样本空间内找到一个划分超平面，将不同类别的样本分开，最好是找到两类训练样本“正中间”的划分超平面。
+
+
+这个划分超平面$(\boldsymbol w, b )$可通过如下线性方程描述：\[
+\boldsymbol{w}^\mathrm{T}\boldsymbol{x}+b = 0
+\]其中$ \boldsymbol{w}=\left(w_{1} ; w_{2} ; \ldots ; w_{d}\right) $代表超平面的方向，b为位移项，代表了超平面与原点之间的距离。
+
+样本空间内任一点$\boldsymbol x$到超平面之间的距离为：\[
+r=\frac{\left|\boldsymbol{w}^{\mathrm{T}} \boldsymbol{x}+b\right|}{\|\boldsymbol{w}\|}
+\]
+
+\marginpar{\footnotesize 最中间的超平面对于训练样本的随机扰动容忍性最高，分类结果最鲁棒，泛化能力最强。}
+
+假设超平面$(w, b)$ 能将训练样本正确分类，即对于 $ (\boldsymbol x_i, y_i) \in D $，若 $ y_i = +1 $，则有 $ \boldsymbol w^T \boldsymbol x_i + b > 0 $; 若 $ y_i = -1 $，则有 $ \boldsymbol w^T \boldsymbol x_i + b < 0 $。令
+\[
+\begin{cases}
+w^T x_i + b \geq +1, & y_i = +1; \\
+w^T x_i + b \leq -1, & y_i = -1.
+\end{cases}
+\]
+
+\begin{figure}[!htbp]
+	\centering
+		\sidecaption{支持向量与间隔。\label{fig:4.1}}{\includegraphics[width=.6\textwidth]{images/support.png}}
+\end{figure}
+
+如图所示，\textbf{距离超平面最近}的这几个训练样本点使上式的等号成立，它们被称为“支持向量”（support vector），两个异类支持向量到超平面的距离之和为
+\[
+\gamma = \frac{2}{\|\boldsymbol w\|}
+\]
+它被称为“间隔”（margin）。
+
+\section{支持向量机基本型}\label{sec:4.2}
+
+欲找到具有“最大间隔”（maximum margin）的划分超平面，也就是要找到能满足式 (6.3) 中约束的参数 $\boldsymbol w$ 和 $b$，使得 $\gamma$ 最大，即
+\marginnote{\footnotesize 这里突然出现的$y_i$是样本点的+/-，实际上就是样本点$(x_i,y_i), y\in \{+1, -1\}$}
+\[
+\max_{\boldsymbol w, b} \frac{2}{\|\boldsymbol w\|} \quad \text{s.t.}\quad y_i(\boldsymbol w^T \boldsymbol x_i + b) \geq 1, i = 1, 2, \ldots, m.
+\]
+
+最大化间隔只需要最大化$||\boldsymbol w||^{-1}$，也即最小化$||\boldsymbol w||^{2}$，于是重写为：
+
+\[
+\min_{\boldsymbol w, b} \frac{1}{2}\| \boldsymbol w\|^2 \quad \text{s.t.}\quad y_i(\boldsymbol w^T \boldsymbol x_i + b) \geq 1, i = 1, 2, \ldots, m.
+\]
+
+上式就是基本型的优化目标。
+
+\section{支持向量机对偶型}\label{sec:4.3}
+对基本型的每条约束引入拉格朗日乘子$\alpha_i \ge 0$能够得到其拉格朗日函数：\[
+L(\boldsymbol{w}, b, \boldsymbol{\alpha})=\frac{1}{2}\|\boldsymbol{w}\|^{2}+\sum_{i=1}^{m} \alpha_{i}\left(1-y_{i}\left(\boldsymbol{w}^{T} \boldsymbol{x}_{i}+b\right)\right)
+\]
+
+令$L(\boldsymbol{w}, b, \boldsymbol{\alpha})$对$\boldsymbol w, b$的偏导数为零可得：
+\[
+\boldsymbol{w}=\sum_{i=1}^{m} \alpha_{i} y_{i} \boldsymbol{x}_{i}, \quad 0=\sum_{i=1}^{m} \alpha_{i} y_{i}
+\]
+将其回代可得到基本型的对偶问题，即对偶型的优化目标：
+\[
+\max_{\alpha} \sum_{i=1}^m\alpha_i - \frac{1}{2}\sum_{i=1}^{m}\sum_{j=1}^m \alpha_i\alpha_j y_i y_j\boldsymbol x_i^{\mathrm{T}}\boldsymbol x_j \]
+\[\quad \text{s.t.}\sum_{i=1}^m\alpha_iy_i = 0, \alpha_i \ge 0, i= 1, 2, \ldots, m.
+\]
+
+\section{特征空间映射}\label{sec:4.4}
+
+若不存在一个能正确划分两类样本的超平面，则将样本从原始空间映射到一个更高维的特征空间，使得样本在这个特征空间内线性可分。
+
+如果原始空间是有限维的，则一定存在一个高维特征空间使得样本可分。
+
+\section{核函数}\label{sec:4.5}
+令 $\phi(x)$ 表示将 $x$ 映射到高维空间后的特征向量，于是，在特征空间中划分超平面所对应的模型可表示为
+\[
+f(x) = w^T \phi(x) + b
+\]
+其中 $w$ 和 $b$ 是模型参数。类似基本型，有
+\[
+\min_{\boldsymbol w, b} \frac{1}{2} \|\boldsymbol w\|^2\quad \text{s.t.} \quad y_i \big(\boldsymbol w^T \phi(\boldsymbol x_i) + b\big) \geq 1, \quad i = 1, 2, \ldots, m.
+\]
+
+其对偶问题是
+\[
+\max_{\alpha} \sum_{i=1}^m \alpha_i - \frac{1}{2} \sum_{i=1}^m \sum_{j=1}^m \alpha_i \alpha_j y_i y_j \phi(\boldsymbol x_i)^T \phi(\boldsymbol x_j).
+\]
+\[
+\text{s.t.} \quad \sum_{i=1}^m\alpha_iy_i = 0, \alpha_i \ge 0, i= 1, 2, \ldots, m.
+\]
+
+计算映射到高维空间的内积可能非常复杂，因此我们设计\textbf{核函数}以绕过显式考虑特征映射以及计算高维内积的困难。
+
+\thm{核函数}{thm_ref}{核函数是这样的一个函数：\[
+\kappa\left(\boldsymbol{x}_{i}, \boldsymbol{x}_{j}\right)=\left\langle\phi\left(\boldsymbol{x}_{i}\right), \phi\left(\boldsymbol{x}_{j}\right)\right\rangle=\phi\left(\boldsymbol{x}_{i}\right)^{\mathrm{T}} \phi\left(\boldsymbol{x}_{j}\right)
+\]
+该函数表示：$\boldsymbol x_i, \boldsymbol x_j$在特征空间的内积等于其在原始样本空间中通过该函数$\kappa$计算得到的结果。通过将其带入对偶式，我们可以得到\textbf{支持向量展式}：\[
+\begin{aligned} f(\boldsymbol{x}) & =\boldsymbol{w}^{\mathrm{T}} \phi(\boldsymbol{x})+b \\ & =\sum_{i=1}^{m} \alpha_{i} y_{i} \phi\left(\boldsymbol{x}_{i}\right)^{\mathrm{T}} \phi(\boldsymbol{x})+b \\ & =\sum_{i=1}^{m} \alpha_{i} y_{i} \kappa\left(\boldsymbol{x}, \boldsymbol{x}_{i}\right)+b\end{aligned}
+\]
+由Mercer定理，只要一个对称函数所对应的核矩阵\textbf{半正定}，即可作为核函数使用。
+}
+
+\begin{figure}[!htbp]
+	\centering
+		\sidecaption{一些常用的核函数，高斯核分类性能很强。\label{fig:4.2}}{\includegraphics[width=.8\textwidth]{images/kernel.png}}
+\end{figure}
+
+\section{软间隔支持向量机}\label{sec:4.6}
+实际应用中，很难确定合适的核函数使得训练样本在特征空间中线性可分。因此引入“软间隔”，允许向量机在一定的样本上出错，不满足约束$y_i(\boldsymbol{w}^\mathrm{T}\boldsymbol{x}+b) \ge 1$。
+
+软间隔的优化目标为：
+\[
+\min _{\boldsymbol{w}, b} \frac{1}{2}\|\boldsymbol{w}\|^{2}+C \sum_{i=1}^{m} \ell_{0 / 1}\left(y_{i}\left(\boldsymbol{w}^{\mathrm{T}} \boldsymbol{x}_{i}+b\right)-1\right)
+\]
+其中$\ell_{0 / 1}$是0/1损失函数：\[
+\ell_{0 / 1}(z)=\left\{\begin{array}{ll}1, & \text { if } z<0 \\ 0, & \text { otherwise }\end{array}\right.
+\]
+但0/1损失函数性质不好，不连续不可导，于是使用替代函数hinge损失：$\ell_{hinge}(z) = \max(0, 1-z)$与松弛变量$\xi_i \ge 0$，得到软间隔SVM基本型：
+
+\[
+\min_{\boldsymbol w, b, \xi_i} \frac{1}{2}\| \boldsymbol w\|^2+C\sum_{i=1}^{m}\xi_i \quad \text{s.t.}\quad y_i(\boldsymbol w^T \boldsymbol x_i + b) \geq 1-\xi_i, \ \xi_i\ge 0, \ i = 1, 2, \ldots, m.
+\]
+
+同样，引入拉格朗日算子可得对应拉格朗日函数:
+\[
+L(\boldsymbol{w}, b, \boldsymbol{\alpha}, \boldsymbol \xi , \boldsymbol \mu)=\frac{1}{2}\|\boldsymbol{w}\|^{2}+ C\sum_{i=1}^{m}\xi_i +\sum_{i=1}^{m} \alpha_{i}\left(1- \xi_i - y_{i}\left(\boldsymbol{w}^{T} \boldsymbol{x}_{i}+b\right)\right) - \sum_{i=1}^m\mu_i\xi_i
+\]
+令$L(\boldsymbol{w}, b, \boldsymbol{\alpha}, \boldsymbol \xi , \boldsymbol \mu)$对$\boldsymbol w, b, \xi_i$的偏导数为零可得：
+\[
+\boldsymbol{w}=\sum_{i=1}^{m} \alpha_{i} y_{i} \boldsymbol{x}_{i}, \quad 0=\sum_{i=1}^{m} \alpha_{i} y_{i}, \quad C = \alpha_i+\mu_i
+\]
+
+代回原式可得：
+
+\[
+\max_{\alpha} \sum_{i=1}^m\alpha_i - \frac{1}{2}\sum_{i=1}^{m}\sum_{j=1}^m \alpha_i\alpha_j y_i y_j\boldsymbol x_i^{\mathrm{T}}\boldsymbol x_j \]
+\[\quad \text{s.t.}\sum_{i=1}^m\alpha_iy_i = 0, 0 \le \alpha_i \le C, i= 1, 2, \ldots, m.
+\]
+
+\section{正则化}\label{sec:4.7}
+
+写出SVM的一般形式，这个形式也被称之为正则化问题：
+\[
+\min _{f} \Omega(f)+C \sum_{i=1}^{m} \ell\left(f\left(\boldsymbol{x}_{i}\right), y_{i}\right)
+\]
+前项$\Omega(f)$被称为结构风险，用于描述模型本身的某些性质，也被称为正则化项；后项$l(f(\boldsymbol x_i), y_i)$称为经验风险，用于描述模型与训练数据的契合程度；C被称为正则化常数，用于在两者之间调整平衡。
+
+常用的正则化项包括$L_0, L_1, L_2$范数，前两者倾向于非零分量少而稀疏，后者倾向于取值均衡（非零分量个数尽量稠密）。
+
+\section{本章往年考试题目}\label{sec:4.8}
+
+\ex{2022年考试原题}{ex_ref}{SVM基本型和对偶型的联系是什么？它们对应哪些情况，优势和原因？}
+\textbf{联系}：
+
+基本型和对偶型都是二次凸规划问题，根据凸优化理论，都可以利用成熟数值优化软件包得到全局最优解。
+
+基本型善于处理：低维数据/高维稀疏数据
+
+对偶型擅长处理：高维稠密数据/非线性数据（吸收核函数）
+
+\textbf{原因：}
+
+基本型直接优化超平面参数，没有对偶问题的转换，参数较少，易于理解和实现。
+
+对偶型则转化为二次凸优化问题，且容易引入核函数技巧，将难以切分的数据映射到高维后实现数据分类。
+
+\ex{2023年考试原题}{ex_ref}{写出SVM基本型的优化目标，并推导至对偶型，引入核函数，说明核函数的好处。}
+
+见\ref{sec:4.2}, \ref{sec:4.3}, \ref{sec:4.5}节。
+
+核函数的优点: 应对非线性数据，提高模型泛化能力，简化计算过程，并为不同类型的数据提供多样性。

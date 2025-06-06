@@ -1,0 +1,113 @@
+\documentclass[lang=en,12pt,twoside]{textbook}
+% ----------------------------- Math Font ------------------------------------- %
+\usepackage[T1]{fontenc}
+\usepackage{newtx,anyfontsize}
+\DeclareSymbolFont{CMlargesymbols}{OMX}{cmex}{m}{n}
+\let\sum\relax
+\let\prod\relax
+\DeclareMathSymbol{\sum}{\mathop}{CMlargesymbols}{"50}
+\DeclareMathSymbol{\prod}{\mathop}{CMlargesymbols}{"51}
+%% \infty
+\DeclareSymbolFont{symbolsCM}{OMS}{cmsy}{m}{n}
+\SetSymbolFont{symbolsCM}{bold}{OMS}{cmsy}{b}{n}
+\let\txinfty\infty
+\DeclareMathSymbol{\infty}{\mathord}{symbolsCM}{"31}
+\definecolor{nuanbai}{HTML}{f5f5f5}
+\pagecolor{lightgray!6}
+% ---------------------------------------------------------------------------- %
+% \overfullrule=5pt
+% \showboxdepth=\maxdimen
+% \showboxbreadth=\maxdimen
+\tracingonline=1
+\tracingoutput=1
+
+\begin{document}
+%----------------------------------------------------------------------------------------
+%	标题页信息
+%----------------------------------------------------------------------------------------
+\title{Machine Learning and Basic Mathematics}
+\subtitle{\textit{Notes organizations}}
+\author{Yi Ning}
+\date{\today}
+\publishers{}
+%----------------------------------------------------------------------------------------
+
+%----------------------------------------------------------------------------------------
+%	插入自定义标题页
+%----------------------------------------------------------------------------------------
+\begin{titlepage} % 创建一个新的页面
+%用来将图片从左下角开始平铺整个封面
+	\AddToShipoutPicture*{%
+	\AtPageLowerLeft{%
+		\adjustbox{width=1.1\paperwidth, height=1.5\paperheight, keepaspectratio}{% 强制图片至纸张尺寸，但可能裁切
+			\includegraphics{images/pexels-photo-3378916.jpeg}
+		}
+	}
+}
+\begin{flushleft} % 左对齐环境
+	\setlength{\leftskip}{1cm} % 左侧缩进
+	\makeatletter % 允许访问带有@字符的内部命令
+	% \vspace*{4cm} % 标题距离页面顶端的空白
+	% {\color{white}\Huge \textbf{\@title} \par} % 使用前文定义的title作为标题
+	% \vspace{1cm} % 标题和子标题的间距
+	% {\color{white}\Large \@subtitle \par} % 使用前文定义的subtitle作为子标题
+	% \vfill % 作者信息前的垂直填充
+	% {\color{white}\large \@author \par} % 作者名
+	% {\color{white}\large \@publishers \par} % 出版者
+	% {\color{white}\large \today\par} % 日期，默认为当天
+        \begin{tikzpicture}[overlay,remember picture]
+        \begin{pgfonlayer}{bottom}
+            \fill[dblue!10,opacity=0.1] (current page.south west) rectangle ++(\paperwidth,2cm);
+            \node[inner sep=0pt,text=white,font=\large\sffamily,above] (bottominfo) at ([yshift=.7cm]current page.south) {
+                \@author\hspace{4cm}\@publishers\hspace{4cm}\today
+            };
+        \end{pgfonlayer}
+        \fill[color=black!50,opacity=.2]node[append after command={
+            ([yshift=0.5cm]bookinfo.north west) rectangle ([yshift=-0.5cm]bookinfo.south east)},minimum width=\paperwidth,opacity=1,align=left,inner sep=0pt,anchor=west] (bookinfo) at ([shift={(0,4cm)}]current page.west) {\hspace{-7cm}
+                \begin{varwidth}{\linewidth}
+                    \setlength\baselineskip{3ex}
+                    \textcolor{black!10!white}{\Huge \textbf{\@title}} \\[.6cm]
+                    \textcolor{black!10!white}{\Large \@subtitle}
+                \end{varwidth}
+                };
+    \end{tikzpicture}
+	\makeatother % 将@重置为非字母字符
+	\vspace{0cm} % 标题和子标题的间距
+	% 结束左对齐环境
+\end{flushleft}
+\ClearShipoutPicture % 清除背景图片
+\end{titlepage}
+% --------------------------------- 主要内容写在下面 --------------------------------- %
+\pagestyle{Mainpage} % 页面样式
+\chapimg{images/pexels-photo-1452701.jpeg}
+
+\begin{titlepage}
+    \newgeometry{left=2cm,right=2cm,top=2.5cm,bottom=2.2cm}
+    \tableofcontents
+    \restoregeometry
+\end{titlepage}
+%——------------------------------%
+
+\partimg{images/pexels-photo-931018.jpeg}
+\part{Proof of Opennes Conjecture}
+\input{chapter1.tex}
+
+\partimg{images/pexels-photo-931018.jpeg}
+\part{Proof of Opennes Conjecture}
+\input{chapter2.tex}
+
+\partimg{images/pexels-photo-931018.jpeg}
+\part{Proof of Opennes Conjecture}
+\input{chapter3.tex}
+
+\partimg{images/pexels-photo-931018.jpeg}
+\part{Proof of Opennes Conjecture}
+\input{chapter4.tex}
+
+%-----------------------------------%
+\newgeometry{left=2cm,right=2cm,bottom=2cm,top=3cm}
+\printbibliography[heading=bibintoc]
+
+
+\input{Appendix.tex}
+\end{document}

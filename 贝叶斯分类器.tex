@@ -1,0 +1,119 @@
+\chapter{贝叶斯分类器}
+
+\section{贝叶斯决策论}\label{sec:7.1}
+\textbf{贝叶斯决策论}是概率框架下实施决策的基本方法，对于分类任务，在所有相关的概率都已知的情况下，贝叶斯决策论考虑如何基于这些概率和误判损失来选择最优的类别标记。
+
+假设有N种可能的类别标记，即$\mathcal{Y} = \{c_1, c_2, ...,c_N \}$，令$\lambda _{i j}$代表将标记为$c_j$的样本误分类到$c_i$所产生的损失，则基于后验概率将样本$x$分类到第$i$类的“条件风险”为：
+\[
+R\left(c_{i} \mid \boldsymbol{x}\right)=\sum_{j=1}^{N} \lambda_{i j} P\left(c_{j} \mid x\right)
+\]
+
+我们希望寻找一个判定准则$h:\mathcal{X\to Y}$以最小化整体条件风险：
+\[
+R(h) = \mathbb{E}_ {\boldsymbol x}[R(h(\boldsymbol x) \mid\boldsymbol x)],
+\]
+而\textbf{贝叶斯判定准则}表明，为最小化总体风险，只需要在每个样本上选择哪个能使条件风险$R(c\mid\boldsymbol x)$最小的类别标记，即\[
+h^{*}(\boldsymbol{x})=\underset{c \in \mathcal{Y}}{\arg \min } R(c \mid \boldsymbol{x})
+\]
+
+此时的$h^*$被称为\textbf{贝叶斯最优分类器}，该总体风险称为\textbf{贝叶斯风险}，这反映了学习性能的理论上限。
+
+但不难发现，贝叶斯判定准则想要使用，就需要获取后验概率$P(c\mid x)$，而在现实任务中后验概率很难获得。因此，机器学习需要基于有限的训练样本集尽可能准确的估计出后验概率$P(c\mid \boldsymbol x)$。
+
+对此，有两种策略：判别式模型或生成式模型。\textbf{判别式模型}通过对给定的$\boldsymbol{x}$直接建模$P(c\mid \boldsymbol x)$来预测$c$，这种模型的代表为决策树/SVM/BP神经网络。而\textbf{生成式模型}则先对联合概率分布$P(\boldsymbol x, c)$建模，再由此获得$P(c|\boldsymbol x)$，其代表为贝叶斯分类器。
+
+\section{朴素贝叶斯与拉普拉斯修正}\label{sec:7.2}
+对于生成式模型而言，必然需要考虑的问题为：\marginpar{\footnotesize 使用贝叶斯公式做了拆解。}
+\[
+P(c \mid \boldsymbol{x})=\frac{P(\boldsymbol{x},c)}{P(\boldsymbol{x})} = \frac{P(c)\ P(\boldsymbol{x}\mid c)}{P(\boldsymbol{x})}
+\]
+估计$P(c \mid x)$的问题可以转化为基于训练数据D来估计先验$P(c)$与似然$P(\boldsymbol x\mid c)$，但$P(\boldsymbol x\mid c)$也是所有属性上的联合概率，很难从有限的训练样本上估计得到。
+
+朴素贝叶斯分类器采用\textbf{属性条件独立性假设}：即对于已知类别，假设所有属性之间相互独立。于是可以改写上式为：
+\[
+P(c \mid \boldsymbol{x})=\frac{P(c)\  P(\boldsymbol{x} \mid c)}{P(\boldsymbol{x})}=\frac{P(c)}{P(\boldsymbol{x})} \prod_{i=1}^{d} P\left(x_{i} \mid c\right),
+\]
+其中d为属性数目，$x_i$为$\boldsymbol x$在第i个属性上的取值。
+由于对于所有类别$P(\boldsymbol x)$一致，因此有：
+\[
+h_{n b}(\boldsymbol{x})=\underset{c \in \mathcal{Y}}{\arg \max } P(c) \prod_{i=1}^{d} P\left(x_{i} \mid c\right)
+\]
+
+令$D_c$表示训练集D中第c类样本的集合，则可估计出类先验概率：
+\[
+    P(c) = \frac{| D_c|}{|D|}
+\]
+
+对于离散属性而言，令$D_{c,x_i}$表示$D_c$中在第i个属性上取值为$x_i$的样本组成的集合，则有：
+\[
+    P(x_i\mid c) =\frac{|D_{c,x_i}|}{|D_c|}
+\]
+对于连续属性而言，假设概率密度函数$p(x_i\mid c) \sim \mathcal{N}(\mu_{c,i},\sigma^2_{c,i})$，则有：
+\[
+p\left(x_{i} \mid c\right)=\frac{1}{\sqrt{2 \pi} \sigma_{c, i}} \exp \left(-\frac{\left(x_{i}-\mu_{c, i}\right)^{2}}{2 \sigma_{c, i}^{2}}\right)
+\]
+
+为了避免其他属性携带的信息被训练集中未出现的属性值抹去，在估计概率值时通常要使用\textbf{拉普拉斯修正}进行平滑，我们修正类先验概率与离散属性条件概率为：
+\[
+    \hat{P}(c) = \frac{|D_c|+1}{|D|+N}
+\]
+\[
+    \hat{P}(x_i\mid c) = \frac{|D_{c,x_i}|+1}{|D_c|+N_i}
+\]
+其中$N$代表训练集中可能的类别数，$N_i$表示第$i$个属性可能的取值数。
+
+\section{半朴素贝叶斯}\label{sec:7.3}
+朴素贝叶斯的属性独立性假设在现实中往往难以成立，因此适当考虑一部分属性之间的相互依赖信息的\textbf{半朴素贝叶斯分类器}诞生。
+
+半朴素贝叶斯分类器最常用的策略为\textbf{独依赖估计}，该策略假设每个属性在类别之外最多仅依赖一个其他属性，被称为父属性。\[
+P(c \mid x) \propto P(c) \prod_{i=1}^{d} P\left(x_{i} \mid c, p a_{i}\right)，
+\]这其中$pa_i$就是$x_i$的父属性。
+
+如何确定每个属性的父属性有一系列的方法，包括：
+\begin{itemize}
+    \item SPODE：假设所有属性均依赖同一个属性，这个属性被称为超父Super Father，通过交叉验证等方式确定该属性。
+    \item TAN：以属性间的条件”互信息”为边的权重，构建完全图，再利用最大带权生成树算法，仅保留强相关属性间的依赖性。
+    \item AODE：尝试以每个属性作为超父构建SPODE，然后集成所有有足够数据支撑的SPODE作为最终结果\[
+P(c \mid \boldsymbol{x}) \propto \sum_{\substack{i=1 \\\left|D_{x_{i}}\right| \geqslant m^{\prime}}}^{d} P\left(c, x_{i}\right) \prod_{j=1}^{d} P\left(x_{j} \mid c, x_{i}\right)
+\]
+\[
+\hat{P}\left(c, x_{i}\right)=\frac{\left|D_{c, x_{i}}\right|+1}{|D|+N_{i}}, \quad \hat{P}\left(x_{j} \mid c, x_{i}\right)=\frac{\left|D_{c, x_{i}, x_{j}}\right|+1}{\left|D_{c, x_{i}}\right|+N_{j}}
+\]其中$D_{x_i}$是在第i个属性上取值为$x_i$的样本集合，$D_{c,x_i,x_j}$表示类别为c且在第i/j个属性上取值为$x_i$与$x_j$的样本集合。
+\end{itemize}
+
+\section{贝叶斯网}\label{sec:7.4}
+贝叶斯网通过借助有向无环图DAG构建属性之间的依赖关系。
+
+具体而言，一个贝叶斯网$B=\langle G, \Theta\rangle$由DAG网络结构$G$与直接依赖关系的条件概率集合$\theta_{x_i|\pi_i} = P_B(x_i\mid \pi_i)$组成，其中$\pi_i$是属性$x_i$在G中的父节点集合。给定父结点集，贝叶斯网假设每个属性与其非后裔属性独立。
+
+\begin{figure}[!htbp]
+	\centering
+		\sidecaption{西瓜问题的一种贝叶斯网结构。\label{fig:7.1}}{\includegraphics[width=.8\textwidth]{images/bayes.png}}
+\end{figure}
+
+对于上图而言，其联合概率分布定义为：
+\[
+P\left(x_{1}, x_{2}, x_{3}, x_{4}, x_{5}\right)=P\left(x_{1}\right) P\left(x_{2}\right) P\left(x_{3} \mid x_{1}\right) P\left(x_{4} \mid x_{1}, x_{2}\right) P\left(x_{5} \mid x_{2}\right)
+\]
+
+可知，$x_3,x_4$在给定$x_1$的条件下独立，记作条件独立性$x_{3} \perp x_{4} \mid x_{1}$；给定$x_4$的情况下，$x_1,x_2$必不独立，而若$x_4$未知，则$x_1,x_2$独立，记作边际独立性。三种典型的依赖关系如下图：
+
+\begin{figure}[!htbp]
+	\centering
+		\sidecaption{三变量之间的典型依赖关系。\label{fig:7.1}}{\includegraphics[width=.6\textwidth]{images/depend.png}}
+\end{figure}
+
+将有向图转变为无向图，并在所有V型结构上补充一条边，可以将其转化为道德图，道德图可以导出完整的条件独立性关系：若去掉$z$，$x,y$在图上被分为两个联通分支，则$x \perp y \mid z$。
+
+得到条件独立性关系后，估计出条件概率表，得到最终网络。
+
+\section{本章往年考试题目}\label{sec:7.5}
+
+\ex{2018年考试原题}{ex_ref}{什么是贝叶斯最优分类器？并说明什么是贝叶斯风险。}
+见\ref{sec:7.1}节。
+
+
+\ex{2019, 2020, 2022, 2023年考试原题}{ex_ref}{生成式模型与判别式模型的区别是什么？并各举出一个例子。}
+\textbf{判别式模型}通过对给定的$\boldsymbol x$直接建模后验概率$P(c\mid \boldsymbol x)$来预测类别$c$。这一类模型的例子包括决策树，支持向量机与后向传播模型。
+
+\textbf{生成式模型}则先对联合概率分布$P(\boldsymbol x, c)$建模，再由此获得$P(c|\boldsymbol x) = \frac{P(x,c)}{P(x)}$。这一类模型的例子为贝叶斯分类器。

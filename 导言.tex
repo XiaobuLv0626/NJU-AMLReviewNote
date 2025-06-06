@@ -1,0 +1,124 @@
+\chapter{Introduction}
+\label{cp:introduction}
+
+\textbf{如下为本笔记中所设定的不同样式的标注，特此汇总，以便区
+分：}
+
+\section{列表样式类}
+%无序
+\subsection{无序列表}
+\verb|\begin{itemize}|
+\begin{itemize}
+  \item List entries start with the \verb|\item| command.
+  \item Individual entries are indicated with a black dot, a so-called bullet.
+  \item The text in the entries may be of any length.
+\end{itemize}
+
+%有序
+\subsection{有序列表}
+\verb|\begin{enumerate}|
+\begin{enumerate}%1
+    \item First level item
+    \item First level item
+    \begin{enumerate}%2
+        \item Second level item
+        \item Second level item
+            \begin{enumerate}%3
+                \item Third level item
+                \item Third level item
+                    \begin{enumerate}%4
+                        \item Fourth level item
+                        \item Fourth level item
+                    \end{enumerate}
+            \end{enumerate}
+    \end{enumerate}
+\end{enumerate}
+
+
+\begin{enumerate}[label=\arabic*)]
+    \item 
+    \item 
+    \item 
+\end{enumerate}\verb|\begin{enumerate}[label=\arabic*)]|
+
+
+%多样式列表
+\subsection{多样式列表}
+\begin{itemize}
+  \item[]  This is my first point,\verb|\item[]|%实心圆点
+  \item Another point I want to make,\verb|\item | %无样式点
+  \item[!] A point to exclaim something!, \verb|\item[!]|%叹号标注
+  \item[$\blacksquare$] Make the point fair and square.,\verb|\item[$\blacksquare$]|%实心方块
+\end{itemize}
+
+%description-醒目的列表样式
+\begin{description}
+    \item[NO.1:] description1
+    \item[NO.2:] description2
+\end{description}\verb|\begin{description}\item[1:]|
+
+\section{自定义主题框类}
+
+%importantbox-重要框
+\begin{importantbox}
+    importantbox-重要框
+\end{importantbox}\verb|\begin{importantbox}|
+
+%pro-命题
+\prp{命题名称}{prp_ref}{proposition environment.}\verb|\prp{命题名称}{pro_ref}{proposition environment.}|
+
+%definition-定义
+\begin{prompt}
+    prompt-提示词
+\end{prompt}\verb|\begin{prompt}|
+
+%Lemma-引理
+\lem{引理名称}{lem_ref}{Lemma environment.}\verb|\lem{引理名称}{lem_ref}{Lemma environment.}|
+
+%theorem-定理
+\thm{定理样式2名称}{thm_ref}{Theorem environment.}\verb|\thm{定理样式2名称}{thm_ref}{Theorem environment.}|
+
+%Corollary-推论
+\cor{推论名称}{cor_ref}{Corollary environment.}\verb|\cor{推论名称}{cor_ref}{Corollary environment.}|
+
+%remark-标注
+\begin{remark}
+    remark-标注名称
+\end{remark}\verb|\begin{remark}|
+
+%Keynote-关键笔记
+\begin{Keynote}
+    Keynote-关键笔记
+\end{Keynote}\verb|\begin{Keynote}|
+
+%expansion-延伸部分
+\ext{延伸部分名称}{ext_ref}{Extension environment.}\verb|\ext{延伸部分名称}{ext_ref}{Extension environment.}|
+
+%Example-1
+\noindent\textbf{Example:}Example:
+
+\verb|\noindent\textbf{Example:}|
+
+%Example-2
+\ex{举例名称}{ex_ref}{Example environment.}\verb|\ex{举例名称}{ex_ref}{Example environment.}|
+
+% MATLAB代码示例
+\vspace{.3cm}
+\begin{lstlisting}[style=matlab, caption={MATLAB代码示例}]
+% MATLAB代码示例
+clc;
+clear;
+...
+\end{lstlisting}
+
+\verb|\vspace{.3cm}|
+
+\verb|\begin{lstlisting}[style=matlab, caption={MATLAB代码示例}]|
+
+\section{图片样式}
+%图片插入样式
+\begin{figure}[!htbp]
+	\centering
+		\sidecaption{图例注释\label{fig:example1}}{\includegraphics[width=.5\textwidth]{images/pexels-photo-1452701.jpeg}}
+\end{figure}
+

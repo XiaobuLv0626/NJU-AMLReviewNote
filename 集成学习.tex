@@ -1,0 +1,142 @@
+\chapter{集成学习}
+
+\section{个体与集成}\label{sec:8.1}
+集成学习通过构建并结合多个学习器来完成学习任务，其一般结构为：使用某种策略结合多个“个体学习器”，从而获得比单一学习器更为优越的泛化性能。
+
+如果基分类器的误差相互独立，那么由Hoeffding不等式：
+\[
+\begin{aligned} P(H(\boldsymbol{x}) \neq f(\boldsymbol{x})) & =\sum_{k=0}^{\lfloor T / 2\rfloor}\binom{T}{k}(1-\epsilon)^{k} \epsilon^{T-k} \\ & \leqslant \exp \left(-\frac{1}{2} T(1-2 \epsilon)^{2}\right)\end{aligned}
+\]随着集成个体学习器的数目$T$的增多，误差将指数级下降至接近于0。但实际上，个体学习器来自同一问题，显然不可能互相独立。
+
+如何产生“好且不同”的个体学习器是集成学习研究的核心。
+\marginpar{\footnotesize 好对应学习器的准确性，不同代表个体学习器的多样性。}
+
+集成学习大致可分为两类：
+\begin{itemize}
+    \item 序列化（串行）方法：个体学习器之间存在强依赖关系，必须串行生成，代表方法：Boosting；
+    \item 并行化方法：个体学习器之间不存在强依赖关系，可同时生成。代表方法：Bagging，随机森林。
+\end{itemize}
+
+\section{Boosting}\label{sec:8.2}
+Boosting算法的基本原理是：从初始训练集训练一个基学习器，再根据基学习器的表现对训练样本分布进行调整，使得先前基学习器做错的训练样本在后续受到更多关注，然后基于调整后的样本分布来训练下一个基学习器;如此重复进行，直至基学习器数目达到事先指定的值$T$，最终将这$T$个基学习器进行加权结合。
+
+Boosting算法的代表是Adaboost。
+
+\begin{Keynote}
+笔者不认为这个过于复杂的推导会考，但PPT详细讲述了Adaboost的推导过程，因此这边也加入了笔记，但仅供参考。（考了能推出来的算你无敌）
+\end{Keynote}
+
+\thm{Adaboost}{thm_ref}{这里基于“加性模型”（基学习器的线性组合）来推导Adaboost算法。
+
+假设我们基于数据集$D$，根据样本权值分布$\mathcal{D}_t$训练得到分类器$h_t$，那么基学习器的线性组合即为\[
+H(\boldsymbol{x})=\sum_{t=1}^{T} \alpha_{t} h_{t}(\boldsymbol{x})，
+\]而我们的目标则是最小化指数损失函数：\[
+\ell_{\exp }(H \mid \mathcal{D})=\mathbb{E}_{\boldsymbol{x} \sim \mathcal{D}}\left[e^{-f(\boldsymbol{x}) H(\boldsymbol{x})}\right]
+\]
+能使得指数损失函数最小化的$H(x)$对上式的偏导数应为0，于是对其求偏导：\[
+\frac{\partial \ell_{\exp }(H \mid \mathcal{D})}{\partial H(\boldsymbol{x})}=-e^{-H(\boldsymbol{x})} P(f(\boldsymbol{x})=1 \mid \boldsymbol{x})+e^{H(\boldsymbol{x})} P(f(\boldsymbol{x})=-1 \mid \boldsymbol{x}) = 0,
+\]可以得到：
+\[
+H(\boldsymbol{x})=\frac{1}{2} \ln \frac{P(f(x)=1 \mid \boldsymbol{x})}{P(f(x)=-1 \mid \boldsymbol{x})},
+\]因此，有：
+\[
+\begin{aligned} \operatorname{sign}(H(\boldsymbol{x})) & =\operatorname{sign}\left(\frac{1}{2} \ln \frac{P(f(x)=1 \mid \boldsymbol{x})}{P(f(x)=-1 \mid \boldsymbol{x})}\right) \\ & =\left\{\begin{array}{ll}1, & P(f(x)=1 \mid \boldsymbol{x})>P(f(x)=-1 \mid \boldsymbol{x}) \\ -1, & P(f(x)=1 \mid \boldsymbol{x})<P(f(x)=-1 \mid \boldsymbol{x})\end{array}\right. \\ & =\underset{y \in\{-1,1\}}{\arg \max } P(f(x)=y \mid \boldsymbol{x}),\end{aligned}
+\]
+这说明，$\operatorname{sign}(H(\boldsymbol x))$达到了贝叶斯最优错误率，指数损失函数最小化则分类错误率最小化；因此，指数损失函数是分类任务原本0/1损失函数的一致的替代损失函数，应将其作为优化目标。
+
+Adaboost在基于分布$\mathcal{D}_t$迭代生成基分类器$h_t$后，其权重$\alpha_t$应使得$\alpha_t h_t$最小化指数损失函数：\[
+\begin{aligned} \ell_{\exp }\left(\alpha_{t} h_{t} \mid \mathcal{D}_{t}\right) & =\mathbb{E}_{\boldsymbol{x} \sim \mathcal{D}_{t}}\left[e^{-f(\boldsymbol{x}) \alpha_{t} h_{t}(\boldsymbol{x})}\right] \\ & =\mathbb{E}_{\boldsymbol{x} \sim \mathcal{D}_{t}}\left[e^{-\alpha_{t}} \mathbb{I}\left(f(\boldsymbol{x})=h_{t}(\boldsymbol{x})\right)+e^{\alpha_{t}} \mathbb{I}\left(f(\boldsymbol{x}) \neq h_{t}(\boldsymbol{x})\right)\right] \\ & =e^{-\alpha_{t}} P_{\boldsymbol{x} \sim \mathcal{D}_{t}}\left(f(\boldsymbol{x})=h_{t}(\boldsymbol{x})\right)+e^{\alpha_{t}} P_{\boldsymbol{x} \sim \mathcal{D}_{t}}\left(f(\boldsymbol{x}) \neq h_{t}(\boldsymbol{x})\right) \\ & =e^{-\alpha_{t}}\left(1-\epsilon_{t}\right)+e^{\alpha_{t}} \epsilon_{t} \quad \epsilon_{t}=P_{\boldsymbol{x} \sim \mathcal{D}_{t}}\left(h_{t}(\boldsymbol{x}) \neq f(\boldsymbol{x})\right)\end{aligned}
+\]
+上式对权重求偏导并置零可以得到：
+\[
+    \alpha_t = \frac{1}{2}\ln(\frac{1-\epsilon_t}{\epsilon_t})
+\]
+
+Adaboost在获得对应的分布$H_{t-1}$后，样本分布需要调整以生成新的一轮基学习器$h_t$，理想的$h_t$会纠正$H_{t-1}$的所有错误，即最小化$\ell_{exp}(H_{t-1}+h\mid \mathcal{D})$，通过泰勒展开可以得到更新公式：
+\[
+\begin{aligned} h_{t}(\boldsymbol{x}) & =\underset{h}{\arg \min } \ell_{\exp }\left(H_{t-1}+h \mid \mathcal{D}\right) \\ & =\underset{h}{\arg \min } \mathbb{E}_{\boldsymbol{x} \sim \mathcal{D}}\left[e^{-f(\boldsymbol{x}) H_{t-1}(\boldsymbol{x})}\left(1-f(\boldsymbol{x}) h(\boldsymbol{x})+\frac{1}{2}\right)\right] \\ & =\underset{h}{\arg \max } \mathbb{E}_{\boldsymbol{x} \sim \mathcal{D}}\left[e^{-f(\boldsymbol{x}) H_{t-1}(\boldsymbol{x})} f(\boldsymbol{x}) h(\boldsymbol{x})\right] \\ & =\underset{h}{\arg \max } \mathbb{E}_{\boldsymbol{x} \sim \mathcal{D}}\left[\frac{e^{-f(\boldsymbol{x}) H_{t-1}(\boldsymbol{x})}}{\mathbb{E}_{\boldsymbol{x} \sim \mathcal{D}}\left[e^{-f(\boldsymbol{x}) H_{t-1}(\boldsymbol{x})}\right]} f(\boldsymbol{x}) h(\boldsymbol{x})\right],\end{aligned}
+\]令$\mathcal{D_t}$表示分布：\[
+\mathcal{D}_{t}(\boldsymbol{x})=\frac{\mathcal{D}(\boldsymbol{x}) e^{-f(\boldsymbol{x}) H_{t-1}(\boldsymbol{x})}}{\mathbb{E}_{\boldsymbol{x} \sim \mathcal{D}}\left[e^{-f(\boldsymbol{x}) H_{t-1}(\boldsymbol{x})}\right]}，
+\]可以简化上式为\[
+h_{t}(\boldsymbol{x})   =\underset{h}{\arg \max }\  \mathbb{E}_{\boldsymbol{x} \sim \mathcal{D}_{t}}[f(\boldsymbol{x}) h(\boldsymbol{x})] .
+\]又由$f(x), h(x)\in{-1,+1}$可知：\[
+\begin{aligned}
+f(\boldsymbol{x}) h(\boldsymbol{x}) & =1-2 \mathbb{I}(f(\boldsymbol{x}) \neq h(\boldsymbol{x})) \\
+h_{t}(\boldsymbol{x})&=\underset{h}{\arg \min } \mathbb{E}_{\boldsymbol{x} \sim \mathcal{D}_{t}}[\mathbb{I}(f(\boldsymbol{x}) \neq h(\boldsymbol{x}))]
+\end{aligned}
+\]
+最终样本分布的更新公式为：
+\[
+\begin{aligned} \mathcal{D}_{t+1}(\boldsymbol{x}) & =\frac{\mathcal{D}(\boldsymbol{x}) e^{-f(\boldsymbol{x}) H_{t}(\boldsymbol{x})}}{\mathbb{E}_{\boldsymbol{x} \sim \mathcal{D}}\left[e^{\left.-f(\boldsymbol{x}) H_{t}(\boldsymbol{x})\right]}\right.} \\ & =\frac{\mathcal{D}(\boldsymbol{x}) e^{-f(\boldsymbol{x}) H_{t-1}(\boldsymbol{x})} e^{-f(\boldsymbol{x}) \alpha_{t} h_{t}(\boldsymbol{x})}}{\mathbb{E}_{\boldsymbol{x} \sim \mathcal{D}}\left[e^{\left.-f(\boldsymbol{x}) H_{t}(\boldsymbol{x})\right]}\right.} \\ & =\mathcal{D}_{t}(\boldsymbol{x}) \cdot e^{-f(\boldsymbol{x}) \alpha_{t} h_{t}(\boldsymbol{x})} \frac{\mathbb{E}_{\boldsymbol{x} \sim \mathcal{D}}\left[e^{\left.-f(\boldsymbol{x}) H_{t-1}(\boldsymbol{x})\right]}\right.}{\mathbb{E}_{\boldsymbol{x} \sim \mathcal{D}}\left[e^{\left.-f(\boldsymbol{x}) H_{t}(\boldsymbol{x})\right]}\right.}\end{aligned}
+\]
+}
+\marginpar{\footnotesize 如果想搞懂上面一串公式究竟在推什么，强烈建议阅读南瓜书第八章（8.5——8.19）。}
+
+Adaboost需要基学习器学习特定的数据分布，这可以通过\textbf{重赋权法}（每次对每个训练样本重新赋予权重）或者\textbf{重采样法}（每次对整个训练集重新采样后用于训练）实现。若使用重采样法，还需要\textbf{重启动机制}防止产生不合格学习器导致算法提前终止，性能下降，
+
+\section{Bagging与随机森林}\label{sec:8.3}
+并行化的集成学习可以通过在训练数据集上采样不同的样本子集，再从每个子集训练得到一个基学习器。
+
+\textbf{Bagging}算法给定包括$m$个样本的数据集，有放回的随机采样得到T个含m个样本（可能有重复）的采样集，训练得到基学习器并结合。结合时，对分类任务采用简单投票法，回归任务采用简单平均法。
+
+Bagging的优势在于：时间复杂度很低，可使用包外估计的方式验证泛化性能，能够降低方差，在不剪枝的决策树、神经网络等易受样本影响的学习器上效果更好。
+
+\textbf{随机森林}是bagging的一个扩展，是基于决策树的Bagging集成的一个变种，在决策树的训练过程中引入了随机属性选择。对于基决策树的每个节点，先从该节点的属性结合中随机选择一个包括k个属性的子集，再从这个子集中选择一个最优属性进行划分。
+\marginpar{\footnotesize 传统决策树是从所有的属性中选择一个最优属性。}
+
+\section{结合策略}\label{sec:8.4}
+学习器的组合可以带来三方面的好处：
+\begin{itemize}
+    \item 统计方面：结合多个学习器可以减小“多个假设在训练集上性能一致”的风险；
+    \item 计算方面：结合多个学习器可以降低局部极小带来的糟糕泛化性能；
+    \item 表示方面：结合多个学习器可以提升相应假设空间的大小。
+\end{itemize}
+\begin{figure}[!htbp]
+	\centering
+		\sidecaption{学习器结合的好处\label{fig:8.1}}{\includegraphics[width=.8\textwidth]{images/combination.png}
+  }
+\end{figure}
+一些常见的结合策略：
+\begin{enumerate}
+    \item 平均法：
+    常用于数值型输出，包括：
+    \begin{enumerate}
+        \item 简单平均法：\[H(x) = \frac{1}{T}\sum_{i=1}^T h_i(x)\]
+        
+        \item 加权平均法：\[
+H(\boldsymbol{x})=\sum_{i=1}^{T} w_{i} h_{i}(\boldsymbol{x}), \quad w_{i} \geq 0 
+,\quad \sum_{i=1}^{T} w_{i}=1
+\]
+    \end{enumerate}
+    \item 投票法：常用于分类任务，这里的$h_i^j$代表学习器$h_i$在类别$c_j$上的输出：
+    \begin{enumerate}
+        \item 绝对多数投票法：\[
+H(\boldsymbol{x})=\left\{\begin{array}{ll}c_{j} & \text { if } \sum_{i=1}^{T} h_{i}^{j}(\boldsymbol{x})>\frac{1}{2} \sum_{k=1}^{l} \sum_{i=1}^{T} h_{i}^{k}(\boldsymbol{x}) \\ \text { rejection } & \text { otherwise } .\end{array}\right.
+\]
+        \item 相对多数投票法：\[H(\boldsymbol x) = C_{\underset{j}{\arg \max }\sum_{i=1}^{T}h_i^j(x)}\]即预测为得票最多的标记。
+        
+        \item 加权投票法：\[H(\boldsymbol x) = C_{\underset{j}{\arg \max}\sum_{i=1}^{T} w_i h_i^j(x)}, \quad w_{i} \geq 0 
+,\quad \sum_{i=1}^{T} w_{i}=1\]
+    \end{enumerate}
+    \item 学习法：使用另一个学习器进行结合，\textbf{Stacking}为典型代表。
+    Stacking的优点在于强大的性能，缺点在于次级学习器的输入属性表示和次级学习算法对 Stacking 集成的泛化性能有很大影响。
+\end{enumerate}
+
+\section{多样性}\label{sec:8.5}
+对于集成的泛化误差而言，我们有公式：
+\[
+E = \bar{E} - \bar{A},
+\]
+其中$E$代表集成泛化误差，$\hat{E}$代表所有个体学习器泛化误差的加权均值，$\hat{A}$代表所有个体学习器的加权分歧值。从该式可以得到：个体学习器准确性越高，多样性越大，其集成越好。
+
+常见的增强个体学习器的多样性的方法包括：
+\begin{itemize}
+    \item \textbf{数据样本扰动}：给定初始数据集，产出不同的数据子集用于产生基学习器，一般是基于采样法，对“不稳定基学习器”（决策树，神经网络）很有效。
+    \item \textbf{输入属性扰动}：选择不同的“子空间”（属性子集）训练基学习器，通过减少属性提升训练效率。
+    \item \textbf{输出表示扰动}：操纵输出表示以增强多样性，例如：翻转法改变输入样本的标记；输出调剂法将分类输出改为回归输出；ECOC法将多类任务分解为一系列两类任务。
+    \item \textbf{算法参数扰动}：随机设置不同的参数，例如用“负相关法”强制个体神经网络使用不同参数。
+\end{itemize}
+
+\section{本章往年考试题目}\label{sec:8.6}
+
+本章暂无往年考试题目。
