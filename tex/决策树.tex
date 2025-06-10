@@ -31,7 +31,7 @@ $\operatorname{Ent}(D)$值越小，$D$的纯度越高。
 增益率为平衡属性偏好的不利影响，引入“增益率”选择最优划分属性。
 \marginpar{\footnotesize 增益率偏好取值数较少的属性。}
 \[
-\operatorname{Gain\_ ratio}(D, a)=\frac{\operatorname{Gain}(D, a)}{\operatorname{IV}(a)} = \frac{\operatorname{Gain}(D,a)}{-\frac{\left|D^{v}\right|}{|D|} \log _{2} \frac{\left|D^{v}\right|}{|D|}}
+\operatorname{Gain\_ ratio}(D, a)=\frac{\operatorname{Gain}(D, a)}{\operatorname{IV}(a)} = \frac{\operatorname{Gain}(D,a)}{-\sum_{v=1}^{V}\frac{\left|D^{v}\right|}{|D|} \log _{2} \frac{\left|D^{v}\right|}{|D|}}
 \]
 
 \section{剪枝处理}\label{sec:6.3}
