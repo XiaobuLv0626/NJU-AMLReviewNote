@@ -1,6 +1,6 @@
 # NJU-AMLReviewNote
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 Nanjing University Advanced Machine Learning Review Note
 # 南京大学《高级机器学习》复习笔记
@@ -28,6 +28,7 @@ Nanjing University Advanced Machine Learning Review Note
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/XiaobuLv0626"><img src="https://avatars.githubusercontent.com/u/82595648?v=4?s=100" width="100px;" alt="Sueno_Chiaki"/><br /><sub><b>Sueno_Chiaki</b></sub></a><br /><a href="https://github.com/Sueno_Chiaki/NJU-AMLReviewNote/commits?author=XiaobuLv0626" title="Documentation">📖</a> <a href="https://github.com/Sueno_Chiaki/NJU-AMLReviewNote/commits?author=XiaobuLv0626" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/dnyBLUESKY007"><img src="https://avatars.githubusercontent.com/u/42030190?v=4?s=100" width="100px;" alt="Nongyu Di"/><br /><sub><b>Nongyu Di</b></sub></a><br /><a href="https://github.com/Sueno_Chiaki/NJU-AMLReviewNote/commits?author=dnyBLUESKY007" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Birdium"><img src="https://avatars.githubusercontent.com/u/95538838?v=4?s=100" width="100px;" alt="Birdium"/><br /><sub><b>Birdium</b></sub></a><br /><a href="https://github.com/Sueno_Chiaki/NJU-AMLReviewNote/commits?author=Birdium" title="Documentation">📖</a></td>
     </tr>
   </tbody>
 </table>
